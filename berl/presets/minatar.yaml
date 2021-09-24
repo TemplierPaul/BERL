@@ -1,0 +1,13 @@
+# Minatar
+net: min
+env: min-freeway
+frames: 5000000
+stack_frames: 1
+gen: 100000
+save_freq: 100
+eval_freq: 100
+epsilon: 10000
+target_update: 1000
+reward_clip: 0
+buffer_size: 100000
+learning_rate: 0.00025

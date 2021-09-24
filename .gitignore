@@ -1,0 +1,8 @@
+*__pycache__*
+htmlcov/*
+*wandb*
+.coverage
+saves/*
+testlogs/*
+.vscode/
+test.py

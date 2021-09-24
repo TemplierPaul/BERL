@@ -1,0 +1,11 @@
+# Atari
+net: efficientconv
+env: Breakout-v0
+frames: 27000
+stack_frames: 4
+gen: 100000
+save_freq: 100
+eval_freq: 100
+epsilon: 10000
+target_update: 1000
+reward_clip: 0

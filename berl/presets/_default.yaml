@@ -1,0 +1,35 @@
+env: CartPole-v1
+optim: snes
+algo: neuroevo
+net: flat
+c51: False
+gen: 100
+pop: 8
+seed: 0
+frames: 600
+stack_frames: 1
+reward_clip: 0
+
+# Xp analysis
+plot: False
+wandb: None
+no-save: False 
+save_freq: 10
+eval_freq: 10
+no_store: False
+save_path: .
+
+# DQNES
+nu: 0
+nu-type: standard
+nu-stochastic: True
+
+# DQN
+double_dqn: False
+buffer_size: 10000
+batch_size: 32
+learning_rate: 0.001
+epsilon: 2000
+gamma: 0.99
+target_update: 1000
+SGD: Adam

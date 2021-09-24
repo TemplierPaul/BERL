@@ -1,0 +1,9 @@
+torch
+gym
+matplotlib
+numpy
+dopamine-rl
+stable-baselines3
+stable-baselines3[extra]
+tqdm
+wandb

@@ -1,0 +1,7 @@
+pop: 24
+gen: 100000
+
+save_freq: 100
+eval_freq: 100
+
+save_path: /scratch/disc/p.templier
