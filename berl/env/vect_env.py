@@ -17,7 +17,7 @@ from collections import namedtuple
 
 def _noreset_worker(
     remote: mp.connection.Connection, parent_remote: mp.connection.Connection, env_fn_wrapper: CloudpickleWrapper
-) -> None:
+) -> None: # pragma: no cover
     # Import here to avoid a circular import
     from stable_baselines3.common.env_util import is_wrapped
 
@@ -68,7 +68,7 @@ class NoReset_SubprocVecEnv(SubprocVecEnv):
         self.closed = False
         n_envs = len(env_fns)
 
-        if start_method is None:
+        if start_method is None: # pragma: no cover
             # Fork is not a thread safe method (see issue #217)
             # but is more user friendly (does not require to wrap the code in
             # a `if __name__ == "__main__":`)
@@ -112,7 +112,7 @@ class Fixed_VecTransposeImage(VecTransposeImage):
         for idx, done in enumerate(dones):
             if not done:
                 continue
-            try:
+            try:# pragma: no cover
                 infos[idx]["terminal_observation"] = self.transpose_image(infos[idx]["terminal_observation"])
             except:
                 pass

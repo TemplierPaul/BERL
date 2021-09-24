@@ -16,7 +16,8 @@ cfg = {
     "optim": "snes",
     "env_name": "CartPole-v1",
     "stack_frames":1,
-    "reward_clip":0
+    "reward_clip":0,
+    "max_frames":20
 }
 
 def test_neuroevo():
@@ -42,4 +43,6 @@ def test_neuroevo():
         es.step()
 
     assert len(es.agents) == cfg["pop"]
+    # Test if serializable
+    json.dumps(es.get_config())
     

@@ -27,43 +27,12 @@ class FFNet(nn.Module):
 
         self.n_out=n_out
 
-    def forward(self, x, debug=False):
-        # x = torch.Tensor(x)
-        if debug: 
-            print("0:", (x != x).sum(), x.max())
-            print(x)
+    def forward(self, x):
         x = self.fc1(x)
-        if debug: 
-            print("1:", (x != x).sum(), x.max())
-            params = self.fc1.parameters()
-            params = torch.nn.utils.parameters_to_vector(params)
-            nans=(params != params).sum()
-            print("NaNs: ", nans)
-            print(x)
         x = F.relu(x)
-        # if debug: 
-        #     print("1 ReLU:", (x != x).sum(), x.max())
-        #     print(x)
         x = self.fc2(x)
-        if debug: 
-            print("2:", (x != x).sum(), x.max())
-            params = self.fc2.parameters()
-            params = torch.nn.utils.parameters_to_vector(params)
-            nans=(params != params).sum()
-            print("NaNs: ", nans)
-            print(x)
         x = F.relu(x)
-        # if debug: 
-        #     print("2 ReLU:", (x != x).sum(), x.max())
-        #     print(x)
         x = self.fc3(x)
-        if debug: 
-            print("3:", (x != x).sum(), x.max())
-            params = self.fc3.parameters()
-            params = torch.nn.utils.parameters_to_vector(params)
-            nans=(params != params).sum()
-            print("NaNs: ", nans)
-            print(x)
         return x
     
 def gym_flat_net(env_name, h_size=64):

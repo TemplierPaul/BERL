@@ -2,10 +2,11 @@ from .rl import *
 from .agents import *
 
 class NeuroEvo(RL):
-    def __init__(self, Net, config):
-        super().__init__(Net, config)
+    def __init__(self, Net, config, save_path=None):
+        super().__init__(Net, config, save_path)
 
         self.agents = Population(Net, config)
+        self.hof = None
 
         self.optim = None
         self.set_optim(config["optim"])        
@@ -30,7 +31,7 @@ class NeuroEvo(RL):
             self.agents.reset()
 
             obs = self.env.reset()
-
+            
             total_r = np.zeros(n)
             total_discounted_r = np.zeros(n)
             running = np.ones(n)
@@ -66,19 +67,36 @@ class NeuroEvo(RL):
         prev_frames = self.logger.last("total frames") or 0
         self.logger("total frames", prev_frames + n_frames)
         return self
+    
+    def get_hof(self):
+        best = self.agents.get_best()
+        if self.hof is None or self.hof.fitness < best.fitness:
+            self.hof = best
+                
 
     def step(self):
         self.agents.genomes = self.optim.ask() # Get genomes
-        self.evaluate() # Evaluate pop
+        env_seed = int(self.rng.integers(10000000))
+        self.evaluate(
+            max_frames=self.config["max_frames"],
+            seed=env_seed,
+            clip=self.config["reward_clip"]            
+            ) # Evaluate pop
         self.get_hof() 
         self.optim.tell(self.agents.genomes, self.agents.fitness) # Optim step
         self.log()
-
-    def get_hof(self):
-        raise NotImplementedError
-
-    def log(self):
-        raise NotImplementedError
+        self.save
 
     def train(self, episodes):
         raise NotImplementedError
+
+    def gen_periodic(self, n):
+        """Returns true if a multiple of n (or self.config[n]) gens have been done"""
+        if isinstance(n, (int, float)):
+            return (self.optim.gen +1) % n == 0
+        elif isinstance(n, str):
+            return (self.optim.gen +1) % self.config[n] == 0
+
+    def save(self):
+        if self.gen_periodic("eval_freq"):
+            self.agents.save_models(self.save_path)

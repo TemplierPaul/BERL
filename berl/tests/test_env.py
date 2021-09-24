@@ -24,7 +24,7 @@ def single_test(game, obs_shape):
 
 def vect_test(game, obs_shape):
     n=3
-    env = make_vect_env(game, n=n)
+    env = make_vect_env(game, n=n, seed=0)
 
     if len(obs_shape) > 2:
         assert type(env) ==  Fixed_VecTransposeImage

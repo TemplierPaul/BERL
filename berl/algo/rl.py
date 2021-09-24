@@ -14,7 +14,7 @@ except:
     print("No WANDB")
 
 class RL:
-    def __init__(self, Net, config):
+    def __init__(self, Net, config, save_path=None):
         self.config = config
         self.Net = Net
 
@@ -24,7 +24,7 @@ class RL:
         self.rng = np.random.default_rng(self.config["seed"])
         self.get_env_shape()
 
-        self.agents = []
+        self.agents = None
         self.target = None
 
         self.populate()
@@ -35,13 +35,14 @@ class RL:
             "score"]
         )
 
+        self.save_path = save_path
         self.wandb_run = None
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         s = f"{self.env_name} => RL"
         return s
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return self.__repr__()
 
     def get_env_shape(self):
@@ -79,7 +80,6 @@ class RL:
 
     def get_config(self):
         d = {
-            "network":str(net.__class__.__name__),
             "algo":"neuroevo"
         }
         return {**d, **(self.config)}
@@ -90,19 +90,21 @@ class RL:
             }
         l = self.logger.export()
         d = {**d, **l}
-        if self.wandb_run is not None:
+        if self.wandb_run is not None: # pragma: no cover
             wandb.log(d)
         return d
 
-    def set_wandb(self, project):
+    def set_wandb(self, project): # pragma: no cover
         self.wandb_run = wandb.init(
             project=project,
             config=self.get_config()
         )
         print("wandb run:", wandb.run.name)
     
-    def close_wandb(self):
+    def close_wandb(self): # pragma: no cover
         self.wandb_run.finish()
         self.wandb_run = None
 
-    
+    @abstractmethod
+    def save(self): # pragma: no cover
+        pass

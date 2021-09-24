@@ -53,14 +53,14 @@ class FrameStackState(State):
         x = torch.swapaxes(x, 0, 1)
         return x / 255
         
-    def plot(self):
+    def plot(self): # pragma: no cover
         plt.figure(figsize=(10, 10))
         for i in range(4):
             plt.subplot(2, 2, i+1)
             plt.imshow(self.state[i, 0, :, :], cmap="gray")
         plt.show()
 
-def set_FrameStackState(obs_shape, n_frames=4):
-    def w():
-        return FrameStackState(obs_shape, n_frames=n_frames)
-    return w
+# def set_FrameStackState(obs_shape, n_frames=4):
+#     def w():
+#         return FrameStackState(obs_shape, n_frames=n_frames)
+#     return w

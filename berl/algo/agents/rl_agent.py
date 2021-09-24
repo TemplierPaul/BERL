@@ -72,7 +72,7 @@ class Agent:
             self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.config["lr"])
         return self
 
-    def dqn_loss(self, target, X, A, R, Y, D):
+    def dqn_loss(self, target, X, A, R, Y, D): # pragma: no cover
         state = X.to(self.device)
         actions = A.to(torch.long).to(self.device)
         r = R.to(self.device).unsqueeze(1)
@@ -106,7 +106,7 @@ class Agent:
         loss = self.criterion(current_Q, target_Q)
         return loss
 
-    def backprop(self, loss):
+    def backprop(self, loss): # pragma: no cover
         # loss = self.dqn_loss(*transitions)
         self.optimizer.zero_grad()
         loss.backward()
@@ -114,3 +114,8 @@ class Agent:
         # self.update_target()
         # self.genes = self.get_params()
         return self
+
+    def __eq__(self, other): 
+        if type(other) != type(self): # pragma: no cover
+            return False
+        return (self.genes == other.genes).all()

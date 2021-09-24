@@ -15,8 +15,8 @@ cfg = {
 def run_dqn_test(Net, config):
     dqn = DQN(Net, config)
 
-def test_dqn():
-    raise NotImplementedError
+# def test_dqn():
+    # raise NotImplementedError
 #     run_dqn_test(cfg)
 
 #     cfg["c51"]=True

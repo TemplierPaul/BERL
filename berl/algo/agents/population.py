@@ -1,6 +1,9 @@
 from .rl_agent import *
 from .c51_agent import *
 from glob import glob
+import os
+import errno
+import json
 
 class Population:
     def __init__(self, Net, config):
@@ -28,6 +31,13 @@ class Population:
         for i in range(n):
             self.agents[i].fitness = fit[i]
         return self
+
+    def __repr__(self): # pragma: no cover
+        s = f"Pop: {len(self)}"
+        return s
+
+    def __str__(self): # pragma: no cover
+        return self.__repr__()
 
     def __len__(self):
         return len(self.agents)
@@ -67,7 +77,7 @@ class Population:
         self.create_path(path)
         
         # Config
-        config_path = self.save_path + "/config.json"
+        config_path = path + "/config.json"
         with open(config_path, 'w') as outfile:
             json.dump(self.config, outfile)
 
@@ -85,15 +95,26 @@ class Population:
         assert len(models) > 0, f"No models found in path {path}"
 
         # Config
-        with open(cfg[0], 'w') as outfile:
-            self.config = json.load(self.config, outfile)
+        with open(cfg[0], 'r') as f:
+            self.config = json.load(f)
 
         #  Models
         self.agents = []
         for model_path in models:
-            i = self.make_agent()
-            i.model = torch.load(model_path)
+            i = self.make_agent().make_network()
+            i.model.load_state_dict(torch.load(model_path))
             self.agents.append(i)
 
         return self
-        
+    
+    def has(self, elt):
+        return elt in self.agents
+
+    def get_best(self):
+        best = self[0]
+        assert best.fitness is not None
+
+        for i in self.agents:
+            if i.fitness > best.fitness:
+                best = i
+        return best
