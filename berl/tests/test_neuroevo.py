@@ -17,7 +17,11 @@ cfg = {
     "env_name": "CartPole-v1",
     "stack_frames":1,
     "reward_clip":0,
-    "max_frames":20
+    "max_frames":20000,
+    "max_evals":20000,
+    "max_gen":20000,
+    "eval_frames":20,
+    "eval_freq":1
 }
 
 def test_neuroevo():
@@ -29,18 +33,17 @@ def test_neuroevo():
     es.agents.genomes = es.optim.ask()
     assert len(es.agents) == cfg["pop"]
 
-    es.evaluate(10, seed=0, clip=False)
+    es.evaluate(seed=0, clip=False)
 
     assert all(i.fitness is not None for i in es.agents)
     assert es.logger.last("total frames") > 0
     assert es.env is None
 
-    es.evaluate(10, seed=0, clip=True)
+    es.evaluate(seed=0, clip=True)
     assert es.env is None
 
     es = NeuroEvo(Net, cfg)
-    for _ in range(2):
-        es.step()
+    es.train(2)
 
     assert len(es.agents) == cfg["pop"]
     # Test if serializable

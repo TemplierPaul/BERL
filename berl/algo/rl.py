@@ -5,6 +5,7 @@ from ..env.env import *
 from ..algo.optim import *
 from ..utils import *
 from abc import abstractmethod
+from tqdm import tqdm
 
 try: 
     import wandb
@@ -74,10 +75,6 @@ class RL:
     def populate(self):# pragma: no cover
         pass
 
-    @abstractmethod
-    def train(self):# pragma: no cover
-        pass
-
     def get_config(self):
         d = {
             "algo":"neuroevo"
@@ -101,10 +98,34 @@ class RL:
         )
         print("wandb run:", wandb.run.name)
     
-    def close_wandb(self): # pragma: no cover
-        self.wandb_run.finish()
-        self.wandb_run = None
+    def close_wandb(self): 
+        if self.wandb_run is not None: # pragma: no cover
+            self.wandb_run.finish()
+            self.wandb_run = None
 
     @abstractmethod
     def save(self): # pragma: no cover
         pass
+
+    @abstractmethod
+    def step(self):  # pragma: no cover
+        pass
+
+    def train(self, steps):
+        pbar = tqdm(range(steps))  
+        try:
+            for i in pbar:
+                self.step()
+                self.log()
+                self.save()
+                if self.stop():
+                    break
+        finally:
+            self.close_env()
+            self.close_wandb()
+
+    def stop(self):
+        return (
+                self.logger["total frames"] >= self.config["max_frames"] or
+                self.logger["evaluations"] >= self.config["max_evals"]
+                )

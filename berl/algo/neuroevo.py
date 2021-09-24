@@ -23,7 +23,7 @@ class NeuroEvo(RL):
         n_genes = get_genome_size(self.Net)
         self.optim = OPTIM(n_genes, self.config)
 
-    def evaluate(self, max_frames=np.inf, seed=0, clip=False):
+    def evaluate(self, seed=0, clip=False):
         try:
             n=len(self.agents)
             self.make_env(n=n)
@@ -31,7 +31,7 @@ class NeuroEvo(RL):
             self.agents.reset()
 
             obs = self.env.reset()
-            
+
             total_r = np.zeros(n)
             total_discounted_r = np.zeros(n)
             running = np.ones(n)
@@ -40,7 +40,7 @@ class NeuroEvo(RL):
             run_frames = 0
             # gamma = 1
 
-            while any(running) or n_frames<=max_frames:
+            while any(running) or n_frames<=self.config["eval_frames"]:
                 x = torch.tensor(obs).unsqueeze(1)
 
                 actions = self.agents.act(obs, running)
@@ -78,17 +78,11 @@ class NeuroEvo(RL):
         self.agents.genomes = self.optim.ask() # Get genomes
         env_seed = int(self.rng.integers(10000000))
         self.evaluate(
-            max_frames=self.config["max_frames"],
             seed=env_seed,
             clip=self.config["reward_clip"]            
             ) # Evaluate pop
         self.get_hof() 
         self.optim.tell(self.agents.genomes, self.agents.fitness) # Optim step
-        self.log()
-        self.save
-
-    def train(self, episodes):
-        raise NotImplementedError
 
     def gen_periodic(self, n):
         """Returns true if a multiple of n (or self.config[n]) gens have been done"""
@@ -98,5 +92,12 @@ class NeuroEvo(RL):
             return (self.optim.gen +1) % self.config[n] == 0
 
     def save(self):
-        if self.gen_periodic("eval_freq"):
+        if self.gen_periodic("eval_freq") and self.save_path is not None:
             self.agents.save_models(self.save_path)
+
+    def stop(self):
+        return (
+                (self.logger.last("total frames") or 0) >= self.config["max_frames"] or
+                (self.logger.last("evaluations") or 0) >= self.config["max_evals"] or 
+                self.optim.gen >= self.config["max_gen"] 
+                )
