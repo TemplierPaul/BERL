@@ -64,6 +64,9 @@ class Agent:
         return int(np.argmax(actions))
 
     def set_optim(self):
+        if 'SGD' not in self.config.keys():
+            self.config["SGD"] = "Adam"
+            self.config["lr"] = 0.001
         if self.model is None:
             self.make_network()
         if self.config["SGD"].lower()=="adam":

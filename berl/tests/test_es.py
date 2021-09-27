@@ -36,7 +36,6 @@ def one_max_test(es):
     assert fitnesses[0] < fitnesses[-1] # Check if it maximizes the fitness
     
 
-
 def test_canonical():
     n_genes = 10
     es = Canonical(n_genes, cfg)

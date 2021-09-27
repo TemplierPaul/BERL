@@ -1,13 +1,18 @@
 # Minatar
-net: min
-env: min-freeway
-frames: 5000000
-stack_frames: 1
-gen: 100000
-save_freq: 100
-eval_freq: 100
-epsilon: 10000
-target_update: 1000
-reward_clip: 0
-buffer_size: 100000
-learning_rate: 0.00025
+env: min-freeway  # Env
+net: min         # Network
+gen: 100000          # Number of generations to run
+max_frames: 10000000 # Total frames
+max_evals: 10000000  # Total episodes
+episode_frames: 27000  # Max frames per episode
+stack_frames: 1   # Frames to stack
+reward_clip: 0    # Reward clipping
+
+save_freq: 100     # Number of generations between saving population
+eval_freq: 100     # Number of generations between evaluating the elite
+
+# C51
+c51: True         # Categorical DQN network
+V_min: -1         # C51 param
+V_max: 1          # C51 param
+atoms: 51         # C51 param

@@ -28,6 +28,7 @@ class Population:
     def fitness(self, fit):
         n = len(self.agents)
         assert len(fit)==n
+        # print(fit)
         for i in range(n):
             self.agents[i].fitness = fit[i]
         return self

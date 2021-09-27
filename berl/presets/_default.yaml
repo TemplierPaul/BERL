@@ -1,35 +1,26 @@
-env: CartPole-v1
-optim: snes
-algo: neuroevo
-net: flat
-c51: False
-gen: 100
-pop: 8
-seed: 0
-frames: 600
-stack_frames: 1
-reward_clip: 0
+env: CartPole-v1  # Env
+optim: snes       # Optimizer
+algo: neuroevo    # Algorithm
+net: flat         # Network
+gen: 100          # Number of generations to run
+pop: 8            # Population size
+seed: 0           # Random seed
+max_frames: 20000 # Total frames
+max_evals: 20000  # Total episodes
+episode_frames: 300  # Max frames per episode
+stack_frames: 1   # Frames to stack
+reward_clip: 0    # Reward clipping
 
 # Xp analysis
 plot: False
-wandb: None
-no-save: False 
-save_freq: 10
-eval_freq: 10
-no_store: False
-save_path: .
+wandb: None       # Name of the wandb project
+no_save: False    # If true, doesn't save
+save_freq: 10     # Number of generations between saving population
+eval_freq: 10     # Number of generations between evaluating the elite
+save_path: .      # Path to save the population
 
-# DQNES
-nu: 0
-nu-type: standard
-nu-stochastic: True
-
-# DQN
-double_dqn: False
-buffer_size: 10000
-batch_size: 32
-learning_rate: 0.001
-epsilon: 2000
-gamma: 0.99
-target_update: 1000
-SGD: Adam
+# C51
+c51: True         # Categorical DQN network
+V_min: -1         # C51 param
+V_max: 1          # C51 param
+atoms: 51         # C51 param

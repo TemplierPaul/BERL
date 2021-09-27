@@ -3,9 +3,14 @@ import numpy as np
 from .agents.rl_agent import *
 from ..env.env import *
 from ..algo.optim import *
-from ..utils import *
+from ..utils.logger import *
+from ..utils.models import *
+from ..utils.state import *
 from abc import abstractmethod
 from tqdm import tqdm
+
+import warnings
+warnings.simplefilter("ignore")
 
 try: 
     import wandb
@@ -40,11 +45,14 @@ class RL:
         self.wandb_run = None
 
     def __repr__(self): # pragma: no cover
-        s = f"{self.env_name} => RL"
+        s = f"{self.env} => RL"
         return s
 
     def __str__(self): # pragma: no cover
         return self.__repr__()
+
+    def progress(self):
+        return 'RL'
 
     def get_env_shape(self):
         self.make_env(n=1)
@@ -53,7 +61,7 @@ class RL:
         self.close_env()
 
     def make_env(self, n=1, seed=0):
-        self.env = make_vect_env(env_id=self.config["env_name"], n=n, seed=seed)
+        self.env = make_vect_env(env_id=self.config["env"], n=n, seed=seed)
         return self.env
 
     def close_env(self):
@@ -111,13 +119,16 @@ class RL:
     def step(self):  # pragma: no cover
         pass
 
-    def train(self, steps):
+    def train(self, steps=None):
+        if steps is None:
+            steps = self.config["gen"]
         pbar = tqdm(range(steps))  
         try:
             for i in pbar:
                 self.step()
                 self.log()
                 self.save()
+                pbar.set_description(self.progress())
                 if self.stop():
                     break
         finally:
@@ -126,6 +137,6 @@ class RL:
 
     def stop(self):
         return (
-                self.logger["total frames"] >= self.config["max_frames"] or
-                self.logger["evaluations"] >= self.config["max_evals"]
+                (self.logger.last("total frames") or 0) >= self.config["max_frames"] or
+                (self.logger.last("evaluations") or 0) >= self.config["max_evals"]
                 )

@@ -1,7 +1,0 @@
-algo: dqn
-lr: 0.00025
-buffer_size: 1000000
-double_dqn: True
-SGD: Adam
-reward_clip: 0
-

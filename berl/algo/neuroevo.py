@@ -9,7 +9,18 @@ class NeuroEvo(RL):
         self.hof = None
 
         self.optim = None
-        self.set_optim(config["optim"])        
+        self.set_optim(config["optim"])   
+
+    def __repr__(self): # pragma: no cover
+        s = f'{self.env} => NeuroEvo ({self.optim.__class__.__name__})'
+        return s
+
+    def __str__(self): # pragma: no cover
+        return self.__repr__()
+
+    def progress(self):
+        # \u03BB = lambda
+        return f"NeuroEvo | Max={self.hof.fitness}"     
 
 
     def set_optim(self, name):
@@ -20,7 +31,7 @@ class NeuroEvo(RL):
         }
 
         OPTIM = d[name.lower()]
-        n_genes = get_genome_size(self.Net)
+        n_genes = get_genome_size(self.Net, c51=self.config["c51"])
         self.optim = OPTIM(n_genes, self.config)
 
     def evaluate(self, seed=0, clip=False):
@@ -38,14 +49,13 @@ class NeuroEvo(RL):
             
             n_frames = 0
             run_frames = 0
-            # gamma = 1
 
-            while any(running) or n_frames<=self.config["eval_frames"]:
-                x = torch.tensor(obs).unsqueeze(1)
+            while any(running) and n_frames < self.config["episode_frames"]:
+                obs = torch.tensor(obs).unsqueeze(1)
 
                 actions = self.agents.act(obs, running)
                 self.env.step_async(actions)
-                next_obs, r, done, _ = self.env.step_wait()
+                obs, r, done, _ = self.env.step_wait()
 
                 if clip:
                     r = [max(min(i, self.config["reward_clip"]), -self.config["reward_clip"]) for i in r]
@@ -73,7 +83,6 @@ class NeuroEvo(RL):
         if self.hof is None or self.hof.fitness < best.fitness:
             self.hof = best
                 
-
     def step(self):
         self.agents.genomes = self.optim.ask() # Get genomes
         env_seed = int(self.rng.integers(10000000))
@@ -95,9 +104,29 @@ class NeuroEvo(RL):
         if self.gen_periodic("eval_freq") and self.save_path is not None:
             self.agents.save_models(self.save_path)
 
-    def stop(self):
-        return (
-                (self.logger.last("total frames") or 0) >= self.config["max_frames"] or
-                (self.logger.last("evaluations") or 0) >= self.config["max_evals"] or 
-                self.optim.gen >= self.config["max_gen"] 
-                )
+    def run(self, indiv=None, render=False):
+        if indiv is None:
+            indiv = self.hof
+        self.close_env()
+        env = self.make_env(n=1)
+        try:
+            obs = env.reset() 
+            total_r = 0
+            t = 0
+            while True:
+                # obs = torch.unsqueeze(torch.tensor(obs), 1)
+
+                results = [self.eval_indiv(indiv, s[0], True)]
+                actions = np.array(results)
+                self.env.step_async(actions)
+                obs, r, done, _ = self.env.step_wait()
+
+                total_r += r
+                env.render()
+                t += 1
+                if done or t == max_frames:
+                    break
+            print(f"Stopped after {t} steps")
+        finally:
+            env.close()
+        return total_r

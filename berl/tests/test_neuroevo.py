@@ -14,14 +14,15 @@ cfg = {
     "c51": False,
     "seed": 0,
     "optim": "snes",
-    "env_name": "CartPole-v1",
+    "env": "CartPole-v1",
     "stack_frames":1,
     "reward_clip":0,
     "max_frames":20000,
     "max_evals":20000,
     "max_gen":20000,
     "eval_frames":20,
-    "eval_freq":1
+    "eval_freq":1,
+    "episode_frames":20
 }
 
 def test_neuroevo():
@@ -49,3 +50,4 @@ def test_neuroevo():
     # Test if serializable
     json.dumps(es.get_config())
     
+    # es.eval_hof(render=False)
