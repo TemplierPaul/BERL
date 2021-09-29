@@ -24,3 +24,11 @@ c51: True         # Categorical DQN network
 V_min: -1         # C51 param
 V_max: 1          # C51 param
 atoms: 51         # C51 param
+
+# Canonical 
+es_sigma: 0.01
+es_lr: 1
+es_sigma_factor: 1
+
+# SNES
+es_eta_mu: 1

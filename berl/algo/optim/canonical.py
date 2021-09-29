@@ -9,9 +9,9 @@ class Canonical(ES):
 
         assert(self.n_parents <= config["pop"])
 
-        self.sigma = 1
-        self.lr = 1
-        self.c_sigma_factor = 1
+        self.sigma = config["es_sigma"]
+        self.lr = config["es_lr"]
+        self.c_sigma_factor = config["es_sigma_factor"]
 
         # Current solution (The one that we report).
         self.mu = self.rng.random(self.n_genes)

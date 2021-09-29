@@ -5,13 +5,13 @@ class SNES(ES):
         super().__init__(n_genes, config)
 
         self.mu = self.rng.random(self.n_genes)
-        self.sigma = np.ones(self.n_genes)
+        self.sigma = np.ones(self.n_genes) * config["es_sigma"]
         
         n=config["pop"]
         self.u = np.array([max(0, np.log(n/2+1) - np.log(i)) for i in range(1, n+1)])
         self.u = self.u / sum(self.u) - 1/n_genes
         
-        self.eta_mu = 1.0
+        self.eta_mu = config["es_eta_mu"]
         self.eta_sigma = (3+np.log(n_genes)) / (5*np.sqrt(n_genes))
 
         self.s = None

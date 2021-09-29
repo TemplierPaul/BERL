@@ -1,0 +1,6 @@
+es_sigma: 0.01
+es_lr: 1
+es_sigma_factor: 1
+c51: False
+
+pop: 48
