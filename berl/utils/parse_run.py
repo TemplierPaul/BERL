@@ -21,7 +21,7 @@ import pathlib
 path = str(pathlib.Path(__file__).parent.resolve())
 path = path.split("/BERL/")[0]
 presets_folder = f"{path}/BERL/berl/presets"
-print("Presets folder:", presets_folder)
+# print("Presets folder:", presets_folder)
 
 def str2bool(v):
     if isinstance(v, bool):

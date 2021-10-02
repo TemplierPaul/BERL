@@ -34,12 +34,14 @@ class NeuroEvo(RL):
         n_genes = get_genome_size(self.Net, c51=self.config["c51"])
         self.optim = OPTIM(n_genes, self.config)
 
-    def evaluate(self, seed=0, clip=False):
+    def evaluate(self, pop=None, seed=0, clip=False):
+        if pop is None:
+            pop = self.agents
         try:
-            n=len(self.agents)
+            n=len(pop)
             self.make_env(n=n)
 
-            self.agents.reset()
+            pop.reset()
 
             obs = self.env.reset()
 
@@ -53,7 +55,7 @@ class NeuroEvo(RL):
             while any(running) and n_frames < self.config["episode_frames"]:
                 obs = torch.tensor(obs).unsqueeze(1)
 
-                actions = self.agents.act(obs, running)
+                actions = pop.act(obs, running)
                 self.env.step_async(actions)
                 obs, r, done, _ = self.env.step_wait()
 
@@ -69,7 +71,7 @@ class NeuroEvo(RL):
 
                 # gamma *= self.gamma
 
-            self.agents.fitness = total_r
+            pop.fitness = total_r
         finally:
             self.close_env()
 
@@ -86,10 +88,12 @@ class NeuroEvo(RL):
     def step(self):
         self.agents.genomes = self.optim.ask() # Get genomes
         env_seed = int(self.rng.integers(10000000))
-        self.evaluate(
-            seed=env_seed,
-            clip=self.config["reward_clip"]            
-            ) # Evaluate pop
+        for subpop in self.agents.split(n_workers=self.config["n_workers"]):
+            self.evaluate(
+                pop=subpop,
+                seed=env_seed,
+                clip=self.config["reward_clip"]            
+                ) # Evaluate pop
         self.get_hof() 
         self.optim.tell(self.agents.genomes, self.agents.fitness) # Optim step
 

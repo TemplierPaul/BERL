@@ -12,6 +12,7 @@ stack_frames: 1   # Frames to stack
 reward_clip: 0    # Reward clipping
 
 # Xp analysis
+n_workers: 8
 plot: False
 wandb: None       # Name of the wandb project
 no_save: False    # If true, doesn't save
@@ -29,6 +30,7 @@ atoms: 51         # C51 param
 es_sigma: 0.01
 es_lr: 1
 es_sigma_factor: 1
+es_parents: 4
 
 # SNES
 es_eta_mu: 1

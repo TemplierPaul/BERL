@@ -22,7 +22,11 @@ cfg = {
     "max_gen":20000,
     "eval_frames":20,
     "eval_freq":1,
-    "episode_frames":20
+    "episode_frames":20,
+    "es_sigma": 0.01,
+    "es_lr": 1,
+    "es_sigma_factor": 1,
+    "es_eta_mu": 1
 }
 
 def test_neuroevo():

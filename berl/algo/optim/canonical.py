@@ -5,7 +5,7 @@ class Canonical(ES):
         super().__init__(n_genes, config)
 
         # Number of parents selected
-        self.n_parents = int(config["pop"]/4)
+        self.n_parents = config["es_parents"]
 
         assert(self.n_parents <= config["pop"])
 

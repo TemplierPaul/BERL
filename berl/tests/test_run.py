@@ -48,8 +48,8 @@ def test_set_xp():
     
 def test_run():
     configs = [
-        "--gen=10", # Cartpole
-        "--preset minatar --gen=10 --frames=300", # Minatar
+        "--gen=3", # Cartpole
+        "--preset minatar --gen=3 --frames=300", # Minatar
         "--preset atari --gen=3 --frames=300", # Atari
         "--preset atari --gen=3 --frames=300 --net=conv" # Atari, big network
     ]

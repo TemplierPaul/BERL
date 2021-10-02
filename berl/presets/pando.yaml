@@ -1,4 +1,5 @@
 pop: 24
+n_workers: 24
 gen: 100000
 
 save_freq: 100

@@ -1,6 +1,7 @@
 es_sigma: 0.01
 es_lr: 1
 es_sigma_factor: 1
+es_parents: 50
 c51: False
 
-pop: 48
+pop: 800

@@ -119,3 +119,14 @@ class Population:
             if i.fitness > best.fitness:
                 best = i
         return best
+
+    def split(self, n_workers=None):
+        if n_workers is None or n_workers >= len(self):
+            yield self
+        else:
+            n_groups = len(self) // n_workers + int((len(self) % n_workers) != 0)
+            
+            for i in range(n_groups):
+                subpop = Population(self.Net, self.config)
+                subpop.agents = self.agents[i*n_workers : (i+1)*n_workers]
+                yield subpop

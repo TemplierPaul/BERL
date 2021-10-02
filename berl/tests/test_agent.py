@@ -213,3 +213,12 @@ def test_population():
     next_obs, r, done, _ = env.step_wait()
     
     env.close()
+
+    i = 0
+    for l in pop.split(4):
+        i += 1
+        assert isinstance(l, Population)
+        assert len(l) == 4 or i == 3
+        l.fitness = [1 for _ in l]
+    assert i == 3
+    assert all(i.fitness == 1 for i in pop)

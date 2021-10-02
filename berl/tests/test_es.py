@@ -5,7 +5,11 @@ import numpy as np
 
 cfg = {
     "pop":8,
-    "seed":0
+    "seed":0,
+    "es_sigma": 0.01,
+    "es_lr": 1,
+    "es_sigma_factor": 1,
+    "es_eta_mu": 1
 }
 
 def es_test(es, n_genes, cfg):
