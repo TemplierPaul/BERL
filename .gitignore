@@ -6,3 +6,4 @@ saves/*
 testlogs/*
 .vscode/
 test.py
+*.piynb
