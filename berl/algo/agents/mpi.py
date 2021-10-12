@@ -1,6 +1,9 @@
 from mpi4py import MPI
 import numpy as np
-from .env import *
+from collections import OrderedDict
+from ...env.env import *
+from .rl_agent import Agent
+from .c51_agent import C51Agent
 
 def get_ids(rank):
     ids = []
@@ -12,12 +15,13 @@ def get_ids(rank):
 
 
 class Secondary:
-    def __init__(self, cfg):
+    def __init__(self, Net, config):
+        self.Net = Net
+        self.config = config
+
         self.comm = MPI.COMM_WORLD
         self.rank = self.comm.Get_rank()
         self.size = self.comm.Get_size() # new: gives number of ranks in self.comm
-
-        self.cfg = cfg
 
         self.n_pop = None
         self.n_per_w = None
@@ -29,6 +33,8 @@ class Secondary:
 
         self.keep_running = True
         self.env = None
+
+        self.frames = 0
 
     def __repr__(self):
         return f"Secondary {self.rank}"
@@ -52,6 +58,7 @@ class Secondary:
         return self.ids 
 
     def run(self):
+        # try:
         while self.keep_running:
             d = self.comm.bcast(None, root=0)
             if d["stop"]:
@@ -59,34 +66,78 @@ class Secondary:
                 self.keep_running = False
                 return 
             self.set_sizes(d["pop_size"])
-            self.make_env(seed=d["seed"])
             self.genomes = self.comm.scatter(None, root=0)
             self.run_evaluations()
+            self.return_info()
+        # except KeyboardInterrupt:
+        #     print("Interrupted")
 
     def run_evaluations(self):
         self.fitnesses = {}
         for i in range(len(self.ids)):
             g = self.genomes[i] # genome
+            g = np.float64(g)
             f = self.evaluate(g)
             self.fitnesses[self.ids[i]] = f
 
-        return self.comm.gather(self.fitnesses, root=0)
+        return self.fitnesses
+        
+    def return_info(self):
+        d = {
+            "fitnesses":self.fitnesses,
+            "frames": self.frames
+        }
+        return self.comm.gather(d, root=0)
 
-    def evaluate(self, genome):
-        return self.rank*100 + genome[0]
+    def evaluate(self, genome, render=False):
+        env = make_env(self.config["env"])()
+        agent = self.make_agent(genome)
+        agent.state.reset()
 
-    def make_env(self, seed=0):
-        print("making env")
+        try:
+            obs = env.reset()
+            n_frames = 0
+            total_r = 0
+            done = False
+
+            while not done and n_frames < self.config["episode_frames"]:
+                action = agent.act(obs)
+                obs, r, done, _ = env.step(action)
+
+                if self.config["reward_clip"]>0:
+                    r = max(min(r, self.config["reward_clip"]), -self.config["reward_clip"])
+
+                if render:
+                    env.render()
+
+                total_r += r
+                n_frames += 1
+
+        finally:
+            env.close()
+        self.frames += n_frames
+        return total_r
+
+    def make_agent(self, genome=None):
+        AgentType = C51Agent if self.config["c51"] else Agent
+        i = AgentType(self.Net, self.config)
+        if genome is not None:
+            i.genes = genome
+        return i
+        
              
 
 class Primary(Secondary):
-    def __init__(self, cfg):
-        super().__init__(self)
+    def __init__(self, Net, config):
+        super().__init__(Net, config)
+        self.total_frames = 0
 
     def __repr__(self):
         return f"Primary ({self.size})"
 
-    def send_genomes(self, pop, seed=0):
+    def send_genomes(self, pop, hof=None, seed=0):
+        if hof is not None:
+            pop = [hof.genes] + pop
         d = {
             "seed":seed, 
             "pop_size":len(pop), 
@@ -98,19 +149,26 @@ class Primary(Secondary):
 
         n_genes = len(pop[0])
 
-        none_pop = [np.full(n_genes, None) for i in range(self.total_n - len(pop))]
-        pop = np.array(pop + none_pop) # Fill with None
+        none_pop = [np.full(n_genes, np.nan) for i in range(self.total_n - len(pop))]
+        pop = np.array(pop + none_pop) # Fill with np.nan
 
         split = pop.reshape((self.size, self.n_per_w, n_genes), order='F')
 
         self.genomes = self.comm.scatter(split, root=0)
-        results = self.run_evaluations()
+        self.run_evaluations()
+        results = self.return_info()
 
         # Order results into array
         d = {}
+        self.total_frames = 0
         for r in results:
-            d = {**d, **r}
+            f = r["fitnesses"]
+            d = {**d, **f}
+            self.total_frames += r["frames"]
         fitnesses = list(OrderedDict(sorted(d.items())).values())
+
+        if hof is not None:
+            hof.fitness = fitnesses.pop(0)
 
         return fitnesses
 

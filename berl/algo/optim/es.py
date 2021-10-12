@@ -1,5 +1,6 @@
 import numpy as np
 from abc import abstractmethod
+from .gradient import *
 
 class ES:
     def __init__(self, n_genes, config):

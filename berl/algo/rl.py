@@ -1,15 +1,18 @@
-import torch
+import warnings
+from abc import abstractmethod
+
 import numpy as np
-from .agents.rl_agent import *
-from ..env.env import *
+import matplotlib.pyplot as plt
+import torch
+from tqdm import tqdm
+
 from ..algo.optim import *
+from ..env.env import *
 from ..utils.logger import *
 from ..utils.models import *
 from ..utils.state import *
-from abc import abstractmethod
-from tqdm import tqdm
+from .agents import *
 
-import warnings
 warnings.simplefilter("ignore")
 
 try: 
@@ -24,14 +27,9 @@ class RL:
         self.config = config
         self.Net = Net
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        self.env = None
         self.rng = np.random.default_rng(self.config["seed"])
-        self.get_env_shape()
-
-        self.agents = None
-        self.target = None
+        
+        self.MPINode = Primary(Net, config)
 
         self.populate()
 
@@ -52,32 +50,10 @@ class RL:
         return self.__repr__()
 
     def progress(self):
-        return 'RL'
-
-    def get_env_shape(self):
-        self.make_env(n=1)
-        self.config["obs_shape"]=self.env.observation_space.shape
-        self.config["n_actions"]=self.env.action_space.n
-        self.close_env()
-
-    def make_env(self, n=1, seed=0):
-        self.env = make_vect_env(env_id=self.config["env"], n=n, seed=seed)
-        return self.env
-
-    def close_env(self):
-        if self.env is not None:
-            self.env.close()
-            self.env=None
-    
-    def progress(self):
         # \u03B5 = epsilon
         fit = np.mean(self.logger["fitness"][-100:]) if len(self.logger["fitness"])>0 else "\u2205"
         frames = self.logger.last("total frames") 
         return f"{self.__class__.__name__} | Last 100={fit} | Frames={frames}"
-
-    def make_agent(self, genes=None):
-        i = Agent(self.Net, self.config)
-        return i
 
     @abstractmethod
     def populate(self):# pragma: no cover
@@ -111,6 +87,9 @@ class RL:
             self.wandb_run.finish()
             self.wandb_run = None
 
+    def close_MPI(self):
+        self.MPINode.stop()
+
     @abstractmethod
     def save(self): # pragma: no cover
         pass
@@ -127,16 +106,30 @@ class RL:
             for i in pbar:
                 self.step()
                 self.log()
-                self.save()
+                # self.save()
                 pbar.set_description(self.progress())
-                if self.stop():
+                stop, stop_msg = self.stop()
+                if stop:
+                    print(stop_msg)
                     break
+        except KeyboardInterrupt:
+            print("Interrupted")
         finally:
-            self.close_env()
+            self.close_MPI()
             self.close_wandb()
 
     def stop(self):
-        return (
-                (self.logger.last("total frames") or 0) >= self.config["max_frames"] or
-                (self.logger.last("evaluations") or 0) >= self.config["max_evals"]
-                )
+        if ( self.logger.last("total frames") or 0 ) >= self.config["max_frames"]:
+            return True, "Termination: total frames"
+        if ( self.logger.last("evaluations") or 0 ) >= self.config["max_evals"]:
+            return True, "Termination: max evaluations"
+        return False, ""
+    
+    def plot(self):
+        x = self.logger["total frames"]
+        y = self.logger["fitness"]
+        plt.plot(x, y)
+        plt.title(str(self))
+        plt.xlabel("Frames")
+        plt.ylabel("Fitness")
+        plt.show()

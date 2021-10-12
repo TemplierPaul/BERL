@@ -2,7 +2,6 @@ from .atari import *
 from .brax import *
 from .gym import *
 from .minatar import *
-from .vect_env import *
 
 def make_env(env_id, seed=None):
     """

@@ -34,24 +34,6 @@ class Logger:
             s+= f"\n - {k} ({len(v)})"
         return s
         
-    
-    def plot(self, ncol=3): # pragma: no cover
-        clear_output(True)
-        l = list(self._data.keys())
-        
-        ncol = min(ncol, len(l))
-        nrows = len(l)//ncol + int(len(l)%ncol != 0)
-        plt.figure(figsize=(25, 5*nrows))
-
-        n = len(l)
-        for i in range(n):
-            data = self._data[l[i]]
-            plt.subplot(nrows, ncol, i+1)
-            plt.plot(data)
-            plt.title(f"{l[i]} | {float(data[-1]):.2f}")
-        plt.show()
-        
-               
     def __call__(self, *args):
         if type(args[0]) == dict:
             self.log_dict(args[0])

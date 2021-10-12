@@ -37,17 +37,25 @@ class Canonical(ES):
         self.genomes = [self.mu + self.sigma * self.s[:, i] for i in range(self.n_pop)]
         return self    
     
+    def back_random(self, genes_after):
+        # Compute the s that would have created that genome
+        s = (genes_after - self.mu)/self.sigma
+        assert (s != s).sum() == 0 # check for NaNs
+        return s
+    
     def update(self):
         d = self.n_genes
         n = self.n_pop
         
+        # self.s = np.array([self.back_random(i) for i in self.genomes]).transpose()
+
         inv_fitnesses = [- f for f in self.fitnesses]
         idx = np.argsort(inv_fitnesses) # indices from highest fitness to lowest
 
         step = np.zeros(d)
         
         for i in range(self.n_parents):
-            step += self.w[i] * self.genomes[idx[i]]
+            step += self.w[i] * self.s[:, idx[i]]
                 
         self.step = self.lr * self.sigma * step
         self.mu += self.step

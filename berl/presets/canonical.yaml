@@ -1,7 +1,7 @@
-es_sigma: 0.01
+optim: canonical
+es_sigma: 1
 es_lr: 1
 es_sigma_factor: 1
-es_parents: 50
-c51: False
+es_parents: 8
 
-pop: 800
+pop: 23
