@@ -65,11 +65,11 @@ parser.add_argument('--V_min', type=int)
 parser.add_argument('--V_max', type=int)
 parser.add_argument('--atoms', type=int)
 
-algos = {
+ALGOS = {
     "neuroevo":NeuroEvo
 }
 
-networks = {
+NETWORKS = {
     "flat":gym_flat_net,
     "conv":gym_conv,
     "efficientconv": gym_conv_efficient,
@@ -103,8 +103,8 @@ def set_xp(args):
 
     args = load_preset(args)
 
-    algo = algos[args.algo.lower()]
-    net = networks[args.net.lower()](args.env)
+    algo = ALGOS[args.algo.lower()]
+    net = NETWORKS[args.net.lower()](args.env)
 
     now = str(datetime.now()).replace(":", "-").replace(" ", "_")
 
@@ -134,3 +134,8 @@ def run_xp(args):
     else:
         print("Not using wandb")
         pb.train(args.gen)
+    try:
+        pb.MPINode.stop()
+    except:
+        pass
+    return pb

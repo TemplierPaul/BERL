@@ -8,6 +8,7 @@ import gym
 from collections import namedtuple
 
 from ..env import MinatarEnv, CartPoleSwingUp, CustomMountainCarEnv
+from .layers import *
 
 def get_genome_size(Net, c51=False):
     model = Net(c51=c51)
@@ -84,6 +85,65 @@ def gym_conv(env_name, h_size=512):
             return ConvNet(h_size, n_out*51)
         else:
             return ConvNet(h_size, n_out)
+    return wrapped
+
+class CanonicalNet(nn.Module):
+    """
+    Network used for Canonical ES: batchnorm, elu activation
+    """
+    def __init__(self, h_size, n_out, stacks=4):
+        super().__init__()
+        self.conv1 = nn.Conv2d(stacks, 32, 8, stride=4, padding=0)
+        self.bn_conv1 = VirtualBatchNorm(32, scale=False, center=True)
+
+        self.conv2 = nn.Conv2d(32, 64, 4, stride=2, padding=0)
+        self.bn_conv2 = VirtualBatchNorm(64, scale=False, center=True)
+
+        self.conv3 = nn.Conv2d(64, 64, 3, stride=1, padding=0)
+        self.bn_conv3 = VirtualBatchNorm(64, scale=False, center=True)
+
+        self.conv_output_size = 3136
+        self.fc1 = nn.Linear(self.conv_output_size, h_size)
+        self.bn_fc1 = VirtualBatchNorm(h_size, scale=False, center=True)
+
+        self.fc2 = nn.Linear(h_size, n_out)
+        self.bn_fc2 = VirtualBatchNorm(n_out, scale=True, center=True)
+
+        self.n_out=n_out
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn_conv1(x)
+        x = F.elu(x)
+
+        x = self.conv2(x)
+        x = self.bn_conv2(x)
+        x = F.elu(x)
+
+        x = self.conv3(x)
+        x = self.bn_conv3(x)
+        x = F.elu(x)
+
+        x = x.view(-1, self.conv_output_size)
+
+        x = self.fc1(x)
+        x = self.bn_fc1(x)
+        x = F.elu(x)
+
+        x = self.fc2(x)
+        x = self.bn_fc2(x)
+
+        return x
+
+def gym_canonical(env_name, h_size=512):
+    env=gym.make(env_name)
+    n_out = env.action_space.n
+    env.close()
+    def wrapped(c51=False):
+        if c51:
+            return CanonicalNet(h_size, n_out*51)
+        else:
+            return CanonicalNet(h_size, n_out)
     return wrapped
 
 ## Atari: Data efficient network for Atari Image
