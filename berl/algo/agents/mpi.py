@@ -21,8 +21,8 @@ class Secondary:
         self.config = config
 
         self.comm = MPI.COMM_WORLD
-        self.rank = self.comm.Get_rank()
-        self.size = self.comm.Get_size() 
+        self.rank = self.comm.Get_rank() -1
+        self.size = self.comm.Get_size() -1
 
         self.n_pop = None
         self.n_per_w = None
@@ -47,13 +47,16 @@ class Secondary:
         return self.__repr__()
 
     def set_sizes(self, n_pop):
+        if self.size == 0:
+            self.n_per_w = n_pop
+            self.total_n = n_pop
+            self.ids = [range(n_pop)]
+            return self.ids 
+
         self.n_pop = n_pop
         self.n_per_w = n_pop // self.size + int(n_pop%self.size > 0)
         self.total_n = self.n_per_w * self.size
 
-        self.get_ids()
-
-    def get_ids(self):
         self.ids = []
         for i in range(self.n_per_w):
             j = i * self.size + self.rank
@@ -104,7 +107,7 @@ class Secondary:
         }
         return self.comm.gather(d, root=0)
 
-    def evaluate(self, genome, seed=0, render=False):
+    def evaluate(self, genome, seed=0, render=False, test=False):
         if seed < 0:
             seed = np.random.randint(0, 1000000000)
         env = make_env(self.config["env"], seed=seed)
@@ -185,8 +188,9 @@ class Primary(Secondary):
         return self.vb
 
     def send_genomes(self, pop, hof=None, seed=0):
-        if hof is not None:
-            pop = [hof.genes] + pop
+        if self.size == 0:
+            return self.evaluate_all(pop, hof=hof, seed=seed)
+
         d = {
             "seed":seed, 
             "pop_size":len(pop), 
@@ -198,14 +202,24 @@ class Primary(Secondary):
 
         # Fill with np.nan
         n_genes = len(pop[0])
-        none_pop = [np.full(n_genes, np.nan) for i in range(self.total_n - len(pop))] 
+        none_pop = [np.full(n_genes, np.nan) for i in range(self.total_n - len(pop))]
         pop = np.array(pop + none_pop) 
 
-        # Split and send to secondary nodes
+        # Split and 
         split = pop.reshape((self.size, self.n_per_w, n_genes), order='F')
 
+        split = [np.nan] + list(split)
+
+        # Send to secondary nodes
         self.genomes = self.comm.scatter(split, root=0)
-        self.run_evaluations()
+
+        if hof is not None:
+            g = hof.genes # genome
+            g = np.float64(g)
+            hof.fitness = self.evaluate(g, seed=seed)
+        
+        self.fitnesses = {}
+        
         results = self.return_info()
 
         # Order results into array
@@ -216,9 +230,6 @@ class Primary(Secondary):
             d = {**d, **f}
             self.total_frames += r["frames"]
         fitnesses = list(OrderedDict(sorted(d.items())).values())
-
-        if hof is not None:
-            hof.fitness = fitnesses.pop(0)
 
         return fitnesses
 
@@ -235,3 +246,12 @@ class Primary(Secondary):
         pop = [elite for i in range(n)]
         return self.send_genomes(pop, seed=-1)
         
+    def evaluate_all(self, pop, hof=None, seed=0):
+        f = [self.evaluate(np.float64(g), seed=seed) for g in pop]
+
+        if hof is not None:
+            g = hof.genes # genome
+            g = np.float64(g)
+            hof.fitness = self.evaluate(g, seed=seed)
+
+        return f

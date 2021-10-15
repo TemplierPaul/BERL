@@ -19,7 +19,7 @@ class NeuroEvo(RL):
         super().__init__(Net, config, save_path)
 
         if self.config["pop_per_cpu"] > 0:
-            self.config["pop"] = self.config["pop_per_cpu"] * (self.MPINode.size - 1)
+            self.config["pop"] = self.config["pop_per_cpu"] * self.MPINode.size
             self.MPINode.config = self.config
 
         self.genomes = None
@@ -28,7 +28,8 @@ class NeuroEvo(RL):
 
         self.optim = None
         self.set_optim(config["optim"])
-        print(self.config["c51"])
+
+        self.logger.add("sigma")
 
     def __repr__(self): # pragma: no cover
         s = f'{self.config["env"]} => NeuroEvo [{self.optim}]'
@@ -76,6 +77,7 @@ class NeuroEvo(RL):
         self.logger("total frames", self.MPINode.total_frames)
         # self.get_hof() 
         self.logger("fitness", self.hof.fitness)
+        self.logger("sigma", np.mean(self.optim.sigma))
         self.optim.tell(self.genomes, self.fitness) # Optim step
 
     def gen_periodic(self, n):
