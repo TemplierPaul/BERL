@@ -2,8 +2,9 @@ from mpi4py import MPI
 import numpy as np
 from collections import OrderedDict
 from ...env.env import *
-from .rl_agent import Agent
+from .rl_agent import Agent, State, FrameStackState
 from .c51_agent import C51Agent
+import torch
 
 def get_ids(rank):
     ids = []
@@ -21,7 +22,7 @@ class Secondary:
 
         self.comm = MPI.COMM_WORLD
         self.rank = self.comm.Get_rank()
-        self.size = self.comm.Get_size() # new: gives number of ranks in self.comm
+        self.size = self.comm.Get_size() 
 
         self.n_pop = None
         self.n_per_w = None
@@ -35,6 +36,9 @@ class Secondary:
         self.env = None
 
         self.frames = 0
+
+        self.n_out = None
+        self.vb = None
 
     def __repr__(self):
         return f"Secondary {self.rank}"
@@ -57,7 +61,18 @@ class Secondary:
                 self.ids.append(j)
         return self.ids 
 
+    def get_n_out(self):
+        model = self.Net(c51=self.config["c51"])
+        mod = list(model._modules.values())
+        n_out = mod[-1].out_features
+        self.config["n_actions"] = int(n_out/51) if self.config["c51"] else n_out
+
+        env = make_env(self.config["env"])
+        self.config["obs_shape"] = env.observation_space.shape
+        env.close()
+
     def run(self):
+        self.vb = self.comm.bcast(None, root=0)
         # try:
         while self.keep_running:
             d = self.comm.bcast(None, root=0)
@@ -67,17 +82,17 @@ class Secondary:
                 return 
             self.set_sizes(d["pop_size"])
             self.genomes = self.comm.scatter(None, root=0)
-            self.run_evaluations()
+            self.run_evaluations(seed=d["seed"])
             self.return_info()
         # except KeyboardInterrupt:
         #     print("Interrupted")
 
-    def run_evaluations(self):
+    def run_evaluations(self, seed=0):
         self.fitnesses = {}
         for i in range(len(self.ids)):
             g = self.genomes[i] # genome
             g = np.float64(g)
-            f = self.evaluate(g)
+            f = self.evaluate(g, seed=seed)
             self.fitnesses[self.ids[i]] = f
 
         return self.fitnesses
@@ -89,9 +104,15 @@ class Secondary:
         }
         return self.comm.gather(d, root=0)
 
-    def evaluate(self, genome, render=False):
-        env = make_env(self.config["env"])()
+    def evaluate(self, genome, seed=0, render=False):
+        if seed < 0:
+            seed = np.random.randint(0, 1000000000)
+        env = make_env(self.config["env"], seed=seed)
         agent = self.make_agent(genome)
+
+        # Virtual batch normalization
+        agent.model(self.vb)
+
         agent.state.reset()
 
         try:
@@ -124,16 +145,44 @@ class Secondary:
         if genome is not None:
             i.genes = genome
         return i
-        
-             
 
 class Primary(Secondary):
     def __init__(self, Net, config):
         super().__init__(Net, config)
         self.total_frames = 0
 
+        self.get_vb()
+        self.comm.bcast(self.vb, root=0)
+
     def __repr__(self):
         return f"Primary ({self.size})"
+
+    def get_vb(self):
+        if self.n_out is None:
+            self.get_n_out()
+
+        env = make_env(self.config["env"])
+
+        # State
+        if self.config["stack_frames"] > 1:
+            state = FrameStackState(self.config["obs_shape"], self.config["stack_frames"])
+        else:
+            state = State()
+
+        vb = []
+        env.reset()
+        while len(vb) < 128:
+            # Apply random action and with 1% chance save this state.
+            a =  np.random.randint(0, self.config["n_actions"])
+            obs, _, done, _ = env.step(a)
+            state.update(obs)
+            if done:
+                env.reset()
+            elif np.random.rand() < 0.01:
+                vb.append(state.get())
+
+        self.vb = torch.stack(vb).squeeze().double()
+        return self.vb
 
     def send_genomes(self, pop, hof=None, seed=0):
         if hof is not None:
@@ -147,11 +196,12 @@ class Primary(Secondary):
         self.set_sizes(len(pop))
         self.comm.bcast(d, root=0) # Send eval info 
 
+        # Fill with np.nan
         n_genes = len(pop[0])
+        none_pop = [np.full(n_genes, np.nan) for i in range(self.total_n - len(pop))] 
+        pop = np.array(pop + none_pop) 
 
-        none_pop = [np.full(n_genes, np.nan) for i in range(self.total_n - len(pop))]
-        pop = np.array(pop + none_pop) # Fill with np.nan
-
+        # Split and send to secondary nodes
         split = pop.reshape((self.size, self.n_per_w, n_genes), order='F')
 
         self.genomes = self.comm.scatter(split, root=0)
@@ -178,3 +228,10 @@ class Primary(Secondary):
             }
         # print("Sending stop signal")
         self.comm.bcast(d, root=0) # Send eval info => init_eval()
+
+    def eval_elite(self, elite):
+        # n = self.size*2
+        n = 100 
+        pop = [elite for i in range(n)]
+        return self.send_genomes(pop, seed=-1)
+        

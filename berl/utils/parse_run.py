@@ -40,30 +40,6 @@ parser.add_argument('--preset',
     nargs='+',
     default=None)
 
-parser.add_argument('--env')
-parser.add_argument('--optim')
-parser.add_argument('--algo')
-parser.add_argument('--net')
-parser.add_argument('--gen', type=int)
-parser.add_argument('--pop', type=int)
-parser.add_argument('--seed', type=int)
-parser.add_argument('--max_frames', type=int)
-parser.add_argument('--max_evals', type=int)
-parser.add_argument('--frames', type=int, dest="episode_frames")
-parser.add_argument('--stack', type=int, dest="stack_frames")
-parser.add_argument('--reward_clip', type=int)
-
-parser.add_argument('--plot', default=None, action="store_true")
-parser.add_argument('--wandb')
-parser.add_argument('--no_save', default=None, action="store_true")
-parser.add_argument('--save_freq', type=int)
-parser.add_argument('--eval_freq', type=int)
-parser.add_argument('--save_path')
-
-parser.add_argument('--c51')
-parser.add_argument('--V_min', type=int)
-parser.add_argument('--V_max', type=int)
-parser.add_argument('--atoms', type=int)
 
 ALGOS = {
     "neuroevo":NeuroEvo
@@ -134,8 +110,27 @@ def run_xp(args):
     else:
         print("Not using wandb")
         pb.train(args.gen)
-    try:
-        pb.MPINode.stop()
-    except:
-        pass
+    # try:
+    #     pb.MPINode.stop()
+    # except:
+    #     pass
     return pb
+
+# Get default config
+args, unknown = parser.parse_known_args()
+args = load_preset(args)
+cfg = args.__dict__
+# Add each argument in the yaml file to the parser
+for k, v in cfg.items():
+    if isinstance(v, str):
+        parser.add_argument(f'--{k}', type=str)
+    elif isinstance(v, bool):
+        parser.add_argument(f'--{k}', default=None, action='store_true')
+    elif isinstance(v, int):
+        parser.add_argument(f'--{k}', type=int)
+    elif isinstance(v, float):
+        parser.add_argument(f'--{k}', type=float)
+    elif isinstance(v, list):
+        assert k =="preset"
+    else:
+        raise NotImplementedError(f"Argument error: {k} ({v})")

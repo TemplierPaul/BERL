@@ -10,8 +10,28 @@ def make_env(env_id, seed=None):
     :param env_id: (str) the environment ID
     :param seed: (int) the inital seed for RNG
     :param rank: (int) index of the subprocess
-    """
-    def gym_init():
+    """        
+
+    #TODO Add Brax make_env
+
+    if env_id.lower() == "swingup":
+        env = CartPoleSwingUp()
+        if seed is not None: env.seed(seed)
+        return env
+
+    elif env_id.lower() == "custommc":
+        env = CustomMountainCarEnv()
+        if seed is not None: env.seed(seed)
+        return env
+
+    elif env_id in MINATAR_ENVS:
+        env=MinatarEnv(env_id)
+        if seed is not None: env.seed(seed)
+        # Re-order channels, from HxWxC to CxHxW for Pytorch
+        env = TorchTransposeWrapper(env)
+        return env
+
+    else:
         env = gym.make(env_id)
         n_in = env.observation_space.shape
 
@@ -26,36 +46,5 @@ def make_env(env_id, seed=None):
             env = wrap_canonical(env)
         if seed is not None: env.seed(seed)
         return env
-        
-    def swingup_init():
-        env = CartPoleSwingUp()
-        if seed is not None: env.seed(seed)
-        return env
 
-    def customMC_init():
-        env = CustomMountainCarEnv()
-        if seed is not None: env.seed(seed)
-        return env
-
-    def minatar_init():
-        env=MinatarEnv(env_id)
-        if seed is not None: env.seed(seed)
-        return env
-
-    #TODO Add Brax make_env
-
-    if env_id.lower() == "swingup":
-        return swingup_init
-    elif env_id.lower() == "custommc":
-        return customMC_init
-    elif env_id in MINATAR_ENVS:
-        return minatar_init
-    else:
-        return gym_init
-
-# def make_vect_env(env_id, n=1, seed=0):
-#     env = NoReset_SubprocVecEnv([make_env(env_id, seed) for i in range(n)], start_method='fork')
-#     if len(env.observation_space.shape) > 2:
-#         # For Torch convolution: 
-#         env = Fixed_VecTransposeImage(env)
-#     return env
+  

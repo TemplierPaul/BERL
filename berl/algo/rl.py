@@ -115,7 +115,7 @@ class RL:
         except KeyboardInterrupt:
             print("Interrupted")
         finally:
-            self.close_MPI()
+            # self.close_MPI()
             self.close_wandb()
 
     def stop(self):

@@ -5,7 +5,7 @@ def test_parse():
     s = "--algo=neuroevo --gen=100 --env=CartPole-v1 --c51=True "
     args, unknown = parser.parse_known_args(s.split())
 
-    assert args.c51 
+    assert args.c51 == False
     assert args.env == "CartPole-v1"
     assert args.algo == "neuroevo"
     assert args.gen == 100
@@ -49,9 +49,9 @@ def test_set_xp():
 def test_run():
     configs = [
         "--gen=3", # Cartpole
-        "--preset minatar --gen=3 --frames=300", # Minatar
-        "--preset atari --gen=3 --frames=300", # Atari
-        "--preset atari --gen=3 --frames=300 --net=conv" # Atari, big network
+        "--preset minatar --gen=3 --episode_frames=300", # Minatar
+        "--preset atari --gen=3 --episode_frames=300", # Atari
+        "--preset atari --gen=3 --episode_frames=300 --net=conv" # Atari, big network
     ]
     for s in configs:
         pb = set_xp(s)

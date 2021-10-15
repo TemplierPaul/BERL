@@ -3,30 +3,30 @@
 import numpy as np
 
 class GradientOptimizer(object):
-    def __init__(self, n_genes):
+    def __init__(self, n_genes, lr):
         self.n_genes = n_genes
+        self.lr = lr
         self.t = 0
 
     def step(self, gradient):
         self.t+=1
-        return gradient
+        return self.lr * gradient
 
 class SGD(GradientOptimizer):
     def __init__(self, n_genes, lr, momentum=0.9):
-        GradientOptimizer.__init__(self, n_genes)
+        GradientOptimizer.__init__(self, n_genes=n_genes, lr=lr)
         self.v = np.zeros(self.n_genes, dtype=np.float32)
-        self.lr, self.momentum = lr, momentum
+        self.momentum = momentum
 
     def step(self, gradient):
         self.t += 1
         self.v = self.momentum * self.v + (1. - self.momentum) * gradient
-        step = -self.lr * self.v
+        step = self.lr * self.v
         return step
 
 class Adam(GradientOptimizer):
     def __init__(self, n_genes, lr, beta1=0.9, beta2=0.999, epsilon=1e-08):
-        Optimizer.__init__(self, n_genes)
-        self.lr = lr
+        GradientOptimizer.__init__(self, n_genes=n_genes, lr=lr)
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
@@ -38,6 +38,6 @@ class Adam(GradientOptimizer):
         a = self.lr * np.sqrt(1 - self.beta2 ** self.t) / (1 - self.beta1 ** self.t)
         self.m = self.beta1 * self.m + (1 - self.beta1) * gradient
         self.v = self.beta2 * self.v + (1 - self.beta2) * (gradient * gradient)
-        step = -a * self.m / (np.sqrt(self.v) + self.epsilon)
+        step = a * self.m / (np.sqrt(self.v) + self.epsilon)
         return step
 

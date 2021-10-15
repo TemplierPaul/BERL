@@ -4,12 +4,12 @@ from .es import *
 class CMAES(ES):
     def __init__(self, n_genes, config):
         super().__init__(n_genes, config)
-        state = n_genes * [0.]
-        sigma = 0.2
-        self.cma = cma.CMAEvolutionStrategy(state, sigma, {"popsize":config["pop"]})
+        sigma = config["es_sigma"]
+        self.cma = cma.CMAEvolutionStrategy(self.theta, sigma, {"popsize":config["pop"]})
     
     def populate(self):
         self.genomes = self.cma.ask()
+        self.theta = self.cma.mean
 
     def update(self):
         # pycma minimizes so we send -1 * fitness to maximize the fitness

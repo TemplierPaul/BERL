@@ -3,16 +3,16 @@ optim: snes       # Optimizer
 algo: neuroevo    # Algorithm
 net: flat         # Network
 gen: 100          # Number of generations to run
-pop: 11            # Population size
+pop: 12           # Population size
 seed: 0           # Random seed
-max_frames: 2000000 # Total frames
+max_frames: 1000000 # Total frames
 max_evals: 20000  # Total episodes
 episode_frames: 300  # Max frames per episode
 stack_frames: 1   # Frames to stack
 reward_clip: 0    # Reward clipping
+pop_per_cpu: 2    # Number of agents per secondary cpu (0 to use "pop" instead)
 
 # Xp analysis
-n_workers: 6
 plot: False
 wandb: None       # Name of the wandb project
 no_save: False    # If true, doesn't save
@@ -21,7 +21,7 @@ eval_freq: 10     # Number of generations between evaluating the elite
 save_path: .      # Path to save the population
 
 # C51
-c51: True         # Categorical DQN network
+c51: False         # Categorical DQN network
 V_min: -1         # C51 param
 V_max: 1          # C51 param
 atoms: 51         # C51 param
@@ -30,7 +30,13 @@ atoms: 51         # C51 param
 es_sigma: 0.01
 es_lr: 1
 es_sigma_factor: 1
-es_parents: 4
+es_mu: 4
 
 # SNES
 es_eta_mu: 1
+
+# OpenAI
+es_momentum: 0.9
+es_beta1: 0.9
+es_beta2: 0.999
+es_gradient: adam

@@ -24,7 +24,7 @@ class State():
     def get(self):
         if self.state is None:
             return None
-        return torch.tensor(self.state).double()
+        return torch.tensor(self.state).double().unsqueeze(0)
 
 
 class FrameStackState(State):
@@ -59,8 +59,3 @@ class FrameStackState(State):
             plt.subplot(2, 2, i+1)
             plt.imshow(self.state[i, 0, :, :], cmap="gray")
         plt.show()
-
-# def set_FrameStackState(obs_shape, n_frames=4):
-#     def w():
-#         return FrameStackState(obs_shape, n_frames=n_frames)
-#     return w

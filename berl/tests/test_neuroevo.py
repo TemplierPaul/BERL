@@ -33,10 +33,10 @@ def test_neuroevo():
     game = "CartPole-v1"
     Net = gym_flat_net(game)
     es = NeuroEvo(Net, cfg)
+    
+    assert len(es.optim.theta) == 4610
 
-    assert len(es.agents) == 0
-    es.agents.genomes = es.optim.ask()
-    assert len(es.agents) == cfg["pop"]
+    es.populate()
 
     es.evaluate(seed=0, clip=False)
 

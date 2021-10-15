@@ -1,23 +1,37 @@
 from .rl import *
+from dataclasses import dataclass
 
+@dataclass
 class Indiv:
-    def __init__(self, genes, fitness):
-        self.genes = genes
-        self.fitness = fitness
+    genes: np.ndarray
+    fitness: float
+
+def to_units(n):
+    l = [1e9, 1e6, 1e3]
+    u = ["b", "m", "k"]
+    for i in range(len(l)):
+        if n >= l[i]:
+            return f"{n / l[i]:.1f}{u[i]}"
+    return str(n)
 
 class NeuroEvo(RL):
     def __init__(self, Net, config, save_path=None):
         super().__init__(Net, config, save_path)
+
+        if self.config["pop_per_cpu"] > 0:
+            self.config["pop"] = self.config["pop_per_cpu"] * (self.MPINode.size - 1)
+            self.MPINode.config = self.config
 
         self.genomes = None
         self.fitness = None
         self.hof = None
 
         self.optim = None
-        self.set_optim(config["optim"])   
+        self.set_optim(config["optim"])
+        print(self.config["c51"])
 
     def __repr__(self): # pragma: no cover
-        s = f'{self.config["env"]} => NeuroEvo ({self.optim.__class__.__name__})'
+        s = f'{self.config["env"]} => NeuroEvo [{self.optim}]'
         return s
 
     def __str__(self): # pragma: no cover
@@ -26,15 +40,16 @@ class NeuroEvo(RL):
     def progress(self):
         # \u03BB = lambda
         frames = self.logger.last("total frames") 
-        fit = np.mean(self.logger["fitness"][-50:]) if len(self.logger["fitness"])>0 else "\u2205"
-        return f"NeuroEvo ({self.optim.__class__.__name__})({self.config['pop']+1}/{self.MPINode.size}) | Fit:{fit} | {self.optim.sigma} | Frames:{frames}"     
+        fit = np.mean(self.logger["fitness"][-10:]) if len(self.logger["fitness"])>0 else "\u2205"
+        return f"NeuroEvo [{self.optim}]({self.config['pop']}/{self.MPINode.size}) | Fit:{fit:.2f} | Frames:{to_units(frames)}"     
 
 
     def set_optim(self, name):
         d={
             "canonical":Canonical,
             "snes":SNES,
-            "cmaes":CMAES
+            "cmaes":CMAES,
+            "openai": OpenAI
         }
 
         OPTIM = d[name.lower()]
@@ -49,16 +64,18 @@ class NeuroEvo(RL):
         if self.hof is None or self.hof.fitness < best_fit:
             best_genes = self.genomes[best_index]
             self.hof = Indiv(best_genes, best_fit)
-        self.logger("fitness", self.hof.fitness)
+        
     
     def step(self):
         self.genomes = None
         self.fitness = None
         self.genomes = self.optim.ask() # Get genomes
         env_seed = int(self.rng.integers(10000000))
+        self.hof = Indiv(self.optim.theta, 0)
         self.fitness = self.MPINode.send_genomes(self.genomes, hof=self.hof, seed=env_seed)
         self.logger("total frames", self.MPINode.total_frames)
-        self.get_hof() 
+        # self.get_hof() 
+        self.logger("fitness", self.hof.fitness)
         self.optim.tell(self.genomes, self.fitness) # Optim step
 
     def gen_periodic(self, n):
@@ -75,8 +92,13 @@ class NeuroEvo(RL):
     def render(self, n=1):
         fitnesses = []
         for _ in range(n):
-            f = self.MPINode.evaluate(self.hof.genes, render=True)
+            f = self.MPINode.evaluate(self.hof.genes, render=True, seed=-1)
             print(f)
             fitnesses.append(f)
         print(f"Mean over {n} runs: {np.mean(fitnesses)}")
+
+    def eval_hof(self):
+        f = self.MPINode.eval_elite(self.hof.genes)
+        print(f"Evaluating elite: {len(f)} evals")
+        print("Fitness of elite:", np.mean(f), "\nstd:", np.std(f))
 

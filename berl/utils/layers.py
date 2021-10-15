@@ -30,6 +30,7 @@ class VirtualBatchNorm(nn.Module):
         self.ref_mu = None
         self.ref_var = None
         self.eps = eps
+        self.out_features=in_features
 
     def _batch_stats(self, x):
         r"""Computes the statistics of the batch ``x``.
