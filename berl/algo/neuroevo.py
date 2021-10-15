@@ -103,4 +103,9 @@ class NeuroEvo(RL):
         f = self.MPINode.eval_elite(self.hof.genes)
         print(f"Evaluating elite: {len(f)} evals")
         print("Fitness of elite:", np.mean(f), "\nstd:", np.std(f))
+        if self.wandb_run is not None: # pragma: no cover
+            wandb.log({
+                "final fitness average": np.mean(f),
+                "final fitness average": np.std(f)
+                })
 
