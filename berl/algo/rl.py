@@ -1,8 +1,11 @@
+import errno
+import os
+from glob import glob
 import warnings
 from abc import abstractmethod
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from tqdm import tqdm
 
@@ -90,6 +93,13 @@ class RL:
     def close_MPI(self):
         self.MPINode.stop()
 
+    def create_path(self, path):
+        try:
+            os.makedirs(path)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
     @abstractmethod
     def save(self): # pragma: no cover
         pass
@@ -106,7 +116,7 @@ class RL:
             for i in pbar:
                 self.step()
                 self.log()
-                # self.save()
+                self.save()
                 pbar.set_description(self.progress())
                 stop, stop_msg = self.stop()
                 if stop:

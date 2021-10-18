@@ -97,6 +97,30 @@ def set_xp(args):
 
     return pb
 
+def load_xp(path, gen=None):
+    # Config
+    config_path = path + "/config.json"
+    cfg = glob(config_path)
+    assert len(cfg) == 1, f"{len(cfg)} config files found in path {path}"
+    args = argparse.ArgumentParser().parse_args("")
+
+    with open(cfg[0], 'r') as f:
+        args.__dict__ = json.load(f)
+    args.preset=[]
+    pb = set_xp(args)
+
+    save_path = f"{path}/checkpoint_*.npz"
+    checkpoints = glob(save_path)
+    checkpoints.sort()
+    assert len(checkpoints) > 0, f"No checkpoints found in path {path}"
+    save_path = checkpoints[-1] if gen is None else f"./{path}/checkpoint_{gen}.npz"
+    f = np.load(save_path)
+    d = {k:f[k] for k in f.files}
+
+    pb.load(d)
+    return pb
+
+
 def run_xp(args):
     pb = set_xp(args)
     print(pb)

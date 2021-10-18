@@ -53,3 +53,18 @@ class ES:
     @abstractmethod
     def update(self): # pragma: no cover
         pass
+
+    def export(self):
+        """
+        Export self state as a dict
+        """
+        d={
+            "gen":self.gen,
+            "theta":self.theta
+        }
+        return d
+
+    def load(self, d):
+        self.gen = int(d["gen"])
+        self.theta = d["theta"]
+        return self

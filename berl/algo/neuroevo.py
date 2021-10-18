@@ -1,5 +1,6 @@
 from .rl import *
 from dataclasses import dataclass
+import json
 
 @dataclass
 class Indiv:
@@ -18,7 +19,7 @@ class NeuroEvo(RL):
     def __init__(self, Net, config, save_path=None):
         super().__init__(Net, config, save_path)
 
-        if self.config["pop_per_cpu"] > 0:
+        if self.config["pop_per_cpu"] > 0 and self.MPINode.size > 0:
             self.config["pop"] = self.config["pop_per_cpu"] * self.MPINode.size
             self.MPINode.config = self.config
 
@@ -87,10 +88,6 @@ class NeuroEvo(RL):
         elif isinstance(n, str):
             return (self.optim.gen +1) % self.config[n] == 0
 
-    def save(self):
-        if self.gen_periodic("eval_freq") and self.save_path is not None:
-            self.agents.save_models(self.save_path)
-
     def render(self, n=1):
         fitnesses = []
         for _ in range(n):
@@ -109,3 +106,26 @@ class NeuroEvo(RL):
                 "final fitness average": np.std(f)
                 })
 
+    def save(self, path=None):
+        if self.gen_periodic("eval_freq") and path is None:
+            path = self.save_path
+
+        if path is not None:
+            self.create_path(path)
+            # Save config
+            config_path = path + "/config.json"
+            with open(config_path, 'w') as outfile:
+                json.dump(self.config, outfile)
+
+            # Save ES + hof
+            save_path = f"{path}/checkpoint_{self.optim.gen}.npz"
+            d = self.optim.export()
+            d["hof_genes"] = self.hof.genes
+            d["hof_fit"] = self.hof.fitness
+            np.savez_compressed(save_path, **d)
+            
+            print(f"Saved at {save_path}")
+
+    def load(self, d):
+        self.hof = Indiv(d["hof_genes"], d["hof_fit"])
+        self.optim.load(d)
