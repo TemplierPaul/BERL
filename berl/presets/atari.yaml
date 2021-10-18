@@ -1,5 +1,5 @@
 # Atari
-env: Breakout-v0  # Env
+env: Pong-v0  # Env
 net: efficientconv # Network
 gen: 100000          # Number of generations to run
 max_frames: 10000000 # Total frames

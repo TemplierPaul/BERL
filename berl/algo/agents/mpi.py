@@ -20,6 +20,10 @@ class Secondary:
         self.Net = Net
         self.config = config
 
+        env = make_env(config["env"])
+        self.config["obs_shape"] = env.observation_space.shape
+        env.close()
+
         self.comm = MPI.COMM_WORLD
         self.rank = self.comm.Get_rank() -1
         self.size = self.comm.Get_size() -1

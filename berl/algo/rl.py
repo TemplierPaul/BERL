@@ -31,8 +31,8 @@ class RL:
         self.Net = Net
 
         self.rng = np.random.default_rng(self.config["seed"])
-        
-        self.MPINode = Primary(Net, config)
+
+        self.MPINode = Primary(Net, self.config)
 
         self.populate()
 
