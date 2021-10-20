@@ -49,6 +49,7 @@ NETWORKS = {
     "flat":gym_flat_net,
     "conv":gym_conv,
     "efficientconv": gym_conv_efficient,
+    "canonical":gym_canonical,
     "min":min_conv
 }
 
