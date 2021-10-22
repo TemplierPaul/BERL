@@ -13,7 +13,7 @@ class SNES(ES):
         self.eta_mu = config["es_eta_mu"]
         self.eta_sigma = (3+np.log(n_genes)) / (5*np.sqrt(n_genes))
 
-        self.s = None
+        # self.s = None
 
     def back_random(self, genes_after):
         # Compute the s that would have created that genome
@@ -23,14 +23,14 @@ class SNES(ES):
 
     def populate(self):
         self.sample_normal()
-        self.genomes = [self.theta + self.sigma * self.s[:, i] for i in range(self.n_pop)]
+        # self.genomes = [self.theta + self.sigma * self.s[:, i] for i in range(self.n_pop)]
         return self    
     
     def update(self):
         d =self.n_genes
         n = self.n_pop
 
-        self.s = np.array([self.back_random(i) for i in self.genomes]).transpose()
+        # self.s = np.array([self.back_random(i) for i in self.genomes]).transpose()
         
         inv_fitnesses = [- f for f in self.fitnesses]
         idx = np.argsort(inv_fitnesses) # indices from highest fitness to lowest
@@ -40,9 +40,10 @@ class SNES(ES):
         grad_sigma = np.zeros(d)
         
         for i in range(n):
-            j = idx[i]
-            grad_theta += self.w[i] * self.s[:, j]
-            grad_sigma += self.w[i] * (self.s[:, j] **2 - 1)
+            noise_i = self.noise_index[idx[i]] # Get noise index of ith best fitness
+            s = self.get_noise(noise_i) # Get noise 
+            grad_theta += self.w[i] * s
+            grad_sigma += self.w[i] * (s **2 - 1)
         
         # Update variables
         self.theta += self.eta_mu * self.sigma * grad_theta

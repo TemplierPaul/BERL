@@ -11,6 +11,7 @@ episode_frames: 300  # Max frames per episode
 stack_frames: 1   # Frames to stack
 reward_clip: 0    # Reward clipping
 pop_per_cpu: 2    # Number of agents per secondary cpu (0 to use "pop" instead)
+noise_size: 5     # Power of 10 for the size of the noise matrix
 
 # Xp analysis
 plot: False

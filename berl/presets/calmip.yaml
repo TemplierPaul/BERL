@@ -1,5 +1,6 @@
 pop: 48
 gen: 100000
+noise_size: 8
 
 save_freq: 100
 eval_freq: 100

@@ -1,5 +1,5 @@
 optim: canonical
-es_sigma: 0.01
+es_sigma: 0.1
 es_lr: 1
 es_sigma_factor: 1
 es_mu: 4

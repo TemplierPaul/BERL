@@ -28,11 +28,11 @@ class Canonical(ES):
         self.c_sigma *= self.c_sigma_factor
         self.const_1 = np.sqrt(self.u_w * self.c_sigma * (2 - self.c_sigma))
 
-        self.s = None
+        # self.s = None
 
     def populate(self):
         self.sample_normal()
-        self.genomes = [self.theta + self.sigma * self.s[:, i] for i in range(self.n_pop)]
+        # self.genomes = [self.theta + self.sigma * self.s[:, i] for i in range(self.n_pop)]
         return self    
     
     def back_random(self, genes_after):
@@ -51,9 +51,13 @@ class Canonical(ES):
         idx = np.argsort(inv_fitnesses) # indices from highest fitness to lowest
 
         step = np.zeros(d)
-        
+        # print("Update")
         for i in range(self.mu):
-            step += self.w[i] * self.s[:, idx[i]]
+            noise_i = self.noise_index[idx[i]] # Get noise index of ith best fitness
+            s = self.get_noise(noise_i) # Get noise 
+            f = self.fitnesses[idx[i]]
+            # print(f" > rank {i} (fit {f}): index {noise_i} -> noise size {len(s)} | weight {self.w[i]}")
+            step += self.w[i] * s
                 
         self.step = self.lr * self.sigma * step
         self.theta += self.step

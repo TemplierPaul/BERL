@@ -55,7 +55,7 @@ class OpenAI(ES):
         
     def populate(self):
         self.sample_symmetry()
-        self.genomes = [self.theta + self.sigma * self.s[:, i] for i in range(self.n_pop)]
+        # self.genomes = [self.theta + self.sigma * self.s[:, i] for i in range(self.n_pop)]
         return self  
     
     def update(self):
@@ -68,7 +68,10 @@ class OpenAI(ES):
         
         gradient = np.zeros(d)
         for i in range(self.n_pop):
-            gradient += self.w[i] * self.s[:, i]
+            noise_i = self.noise_index[i] # Get noise index 
+            s = self.get_noise(noise_i) # Get noise 
+            # print(self.w[i], self.fitnesses[i])
+            gradient += self.w[i] * s
         
         gradient /= self.sigma * self.n_pop
         self.theta += self.gradient_optim.step(gradient)

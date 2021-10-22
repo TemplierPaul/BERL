@@ -14,7 +14,8 @@ class ES:
         # Current solution (The one that we report).
         self.theta = self.rng.standard_normal(self.n_genes) * 0.05
 
-        self.genomes = []
+        self.noise = None
+        self.noise_index = []
         self.fitnesses = []
 
         self.gen = 0
@@ -25,23 +26,39 @@ class ES:
     def __str__(self):
         return self.__repr__()
 
+    ### Noise ###
+
+    def get_noise(self, key):
+        assert self.noise is not None, "There is no noise matrix"
+        if key > 0:
+            return self.noise[key:(key+self.n_genes)]
+        key = abs(key)
+        return -1* self.noise[key:(key+self.n_genes)]
+
+    def r_noise_id(self):
+        return self.rng.integers(0, len(self.noise)-self.n_genes)
+
     def sample_normal(self):
-        self.s = self.rng.standard_normal((self.n_genes, self.n_pop))
+        assert self.noise is not None, "There is no noise matrix"
+        self.noise_index = np.array([self.r_noise_id() for _ in range(self.n_pop)])
+        return self.noise_index
 
     def sample_symmetry(self):
+        assert self.noise is not None, "There is no noise matrix"
         assert self.n_pop % 2 == 0
-        l = self.rng.standard_normal((self.n_genes, int(self.n_pop/2)))
-        self.s = np.concatenate([l, -l], axis=1)
+        l = np.array([self.r_noise_id() for _ in range(int(self.n_pop/2))])
+        self.noise_index = np.concatenate([l, -l], axis=0)
+        return self.noise_index
 
+    ### Ask / Tell interface ###
     def ask(self):
         self.populate()
         self.fitnesses = None
-        return self.genomes
+        return self.noise_index
 
-    def tell(self, pop, fit):
-        assert len(pop) == self.n_pop
-        assert len(pop[0]) == self.n_genes
-        self.genomes = pop
+    def tell(self, noise_id, fit):
+        assert len(noise_id) == self.n_pop
+        self.noise_index = noise_id
         self.fitnesses = fit
         self.update()
         self.gen += 1

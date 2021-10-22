@@ -8,9 +8,10 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
     if rank == 0:
         pb = run_xp(args)
-        pb.eval_hof()
-        # pb.plot()
+        # pb.eval_hof()
+        pb.plot()
         # pb.render(n=5)
+
         pb.close_MPI()
     else:
         args = load_preset(args)
