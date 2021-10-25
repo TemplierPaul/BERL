@@ -31,7 +31,7 @@ class Secondary:
         self.theta = None
         self.sigma = None
         self.n_genes = None
-        noise_size = 5*(10**(config["noise_size"]))
+        noise_size = (10**(config["noise_size"]))
         self.noise = np.random.RandomState(123).randn(int(noise_size)).astype('float32')
 
         self.noise_index = None
