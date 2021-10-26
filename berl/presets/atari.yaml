@@ -11,7 +11,7 @@ save_freq: 100     # Number of generations between saving population
 eval_freq: 100     # Number of generations between evaluating the elite
 
 # C51
-c51: True         # Categorical DQN network
+c51: False         # Categorical DQN network
 V_min: -1         # C51 param
 V_max: 1          # C51 param
 atoms: 51         # C51 param
