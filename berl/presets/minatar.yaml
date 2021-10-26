@@ -2,7 +2,7 @@
 env: min-freeway  # Env
 net: min         # Network
 gen: 100000          # Number of generations to run
-max_frames: 10000000 # Total frames
+max_frames: 1100000000 # Total frames
 max_evals: 10000000  # Total episodes
 episode_frames: 27000  # Max frames per episode
 stack_frames: 1   # Frames to stack

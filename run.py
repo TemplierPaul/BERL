@@ -9,7 +9,7 @@ if __name__ == "__main__":
     if rank == 0:
         pb = run_xp(args)
         # pb.eval_hof()
-        pb.plot()
+        # pb.plot()
         # pb.render(n=5)
 
         pb.close_MPI()
