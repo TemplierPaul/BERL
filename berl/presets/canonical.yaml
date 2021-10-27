@@ -3,3 +3,4 @@ es_sigma: 0.1
 es_lr: 1
 es_sigma_factor: 1
 es_mu: 4
+es_mu_ratio: 16

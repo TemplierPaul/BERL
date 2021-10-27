@@ -32,6 +32,7 @@ es_sigma: 0.01
 es_lr: 1
 es_sigma_factor: 1
 es_mu: 4
+es_mu_ratio: 0
 
 # SNES
 es_eta_mu: 1

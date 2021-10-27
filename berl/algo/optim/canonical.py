@@ -5,7 +5,10 @@ class Canonical(ES):
         super().__init__(n_genes, config)
 
         # Number of parents selected
-        self.mu = config["es_mu"]
+        if config["es_mu_ratio"]>0:
+            self.mu = int(self.n_pop / config["es_mu_ratio"])
+        else:
+            self.mu = config["es_mu"]
 
         assert(self.mu <= config["pop"])
 
