@@ -210,6 +210,7 @@ class Primary(Secondary):
             split = [[]] + split # Add empty list at the beginning
             self.noise_index = self.comm.scatter(split, root=0)
 
+        self.n_genes = self.es.n_genes
         self.run_evaluations(seed=seed)
 
         if hof is not None:
