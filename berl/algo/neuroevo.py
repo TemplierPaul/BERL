@@ -223,7 +223,7 @@ class NeuroEvo:
             return (self.optim.gen +1) % self.config[n] == 0
 
     def save(self, path=None):
-        if self.gen_periodic("eval_freq") and path is None:
+        if self.gen_periodic("save_freq") and path is None:
             path = self.save_path
 
         if path is not None:

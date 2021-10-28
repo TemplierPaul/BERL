@@ -190,6 +190,8 @@ class Primary(Secondary):
         # print(noise_id)
         assert self.es is not None
         if self.size == 0:
+            self.theta = self.es.theta
+            self.sigma = self.es.sigma
             self.noise_index = noise_id
 
         else:
