@@ -38,9 +38,13 @@ class VirtualBatchNorm(nn.Module):
             x (torch.Tensor): Tensor whose statistics need to be computed.
         Returns:
             A tuple of the mean and variance of the batch ``x``.
-        """
+        """  
         mu = torch.mean(x, dim=0, keepdim=True)
         var = torch.var(x, dim=0, keepdim=True)
+        if (var!=var).sum() > 0:
+            print("NAN")
+            print(x)
+            raise
         return mu, var
 
     def _normalize(self, x, mu, var):
@@ -69,7 +73,7 @@ class VirtualBatchNorm(nn.Module):
         bias = self.beta.view(*sizes)
         return y + bias
 
-    def forward(self, x, clear=True):
+    def forward(self, x, clear=False):
         r"""Computes the output of the Virtual Batch Normalization
         Args:
             x (torch.Tensor): A Torch Tensor of dimension at least 2 which is to be Normalized
@@ -81,6 +85,7 @@ class VirtualBatchNorm(nn.Module):
             self.ref_mu, self.ref_var = self._batch_stats(x)
             self.ref_mu = self.ref_mu.clone().detach()
             self.ref_var = self.ref_var.clone().detach()
+            # print("Var", self.ref_var)
             out = self._normalize(x, self.ref_mu, self.ref_var)
         else:
             out = self._normalize(x, self.ref_mu, self.ref_var)
