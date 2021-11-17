@@ -7,6 +7,13 @@ class ES:
         self.n_genes = n_genes
         self.n_pop = config["pop"]
 
+        # Number of parents selected
+        if config["es_mu_ratio"]>0:
+            self.mu = int(self.n_pop / config["es_mu_ratio"])
+            config["es_mu"] = self.mu
+        else:
+            self.mu = config["es_mu"]
+
         self.config = config
 
         self.rng = np.random.default_rng(self.config["seed"])

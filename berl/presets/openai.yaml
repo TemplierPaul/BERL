@@ -1,5 +1,5 @@
 optim: openai
-es_gradient: adam
+es_gradient_optim: adam
 es_sigma: 0.01
 es_lr: 0.01
 es_momentum: 0.9

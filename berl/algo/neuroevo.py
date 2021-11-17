@@ -89,7 +89,8 @@ class NeuroEvo:
             "canonical":Canonical,
             "snes":SNES,
             "cmaes":CMAES,
-            "openai": OpenAI
+            "openai": OpenAI,
+            "custom": CustomES
         }
 
         OPTIM = d[name.lower()]

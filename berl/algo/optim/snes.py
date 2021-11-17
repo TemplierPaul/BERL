@@ -10,7 +10,7 @@ class SNES(ES):
         self.w = np.array([max(0, np.log(n/2+1) - np.log(i)) for i in range(1, n+1)])
         self.w = self.w / sum(self.w) - 1/n
         
-        self.eta_mu = config["es_eta_mu"]
+        self.eta_mu = config["es_lr"]
         self.eta_sigma = (3+np.log(n_genes)) / (5*np.sqrt(n_genes))
 
         # self.s = None

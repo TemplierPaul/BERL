@@ -4,12 +4,6 @@ class Canonical(ES):
     def __init__(self, n_genes, config):
         super().__init__(n_genes, config)
 
-        # Number of parents selected
-        if config["es_mu_ratio"]>0:
-            self.mu = int(self.n_pop / config["es_mu_ratio"])
-        else:
-            self.mu = config["es_mu"]
-
         assert(self.mu <= config["pop"])
 
         self.sigma = config["es_sigma"]

@@ -26,7 +26,7 @@ class OpenAI(ES):
         self.sigma = config["es_sigma"]
 
         # Get gradient optimizer
-        grad_name = config["es_gradient"].lower()
+        grad_name = config["es_gradient_optim"].lower()
         if grad_name == "base":
             self.gradient_optim = GradientOptimizer(
                 n_genes=n_genes,
@@ -70,8 +70,7 @@ class OpenAI(ES):
         for i in range(self.n_pop):
             noise_i = self.noise_index[i] # Get noise index 
             s = self.get_noise(noise_i) # Get noise 
-            # print(self.w[i], self.fitnesses[i])
-            gradient += self.w[i] * s
+            gradient += self.w[i] * s 
         
         gradient /= self.sigma * self.n_pop
         self.theta += self.gradient_optim.step(gradient)

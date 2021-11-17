@@ -32,13 +32,21 @@ es_sigma: 0.01
 es_lr: 1
 es_sigma_factor: 1
 es_mu: 4
-es_mu_ratio: 0
 
-# SNES
-es_eta_mu: 1
-
-# OpenAI
+# OpenAI / Custom
 es_momentum: 0.9
 es_beta1: 0.9
 es_beta2: 0.999
-es_gradient: adam
+es_gradient_optim: Base # Base / SGD / Adam
+
+# Custom
+custom_symmetry: False # True / False
+custom_sigma_update: False   # True / False
+custom_gradient: plain  # Natural / Plain
+custom_rank_sum: True # Use rank-based noise sum
+custom_wi: log    # Weights decay for the rank-based noise sum: linear / log
+custom_wi_sum: 0  # Sum of weights: 0 or 1
+es_mu_ratio: 0
+# Use es_mu_ratio = 1 to use weights on the whole population
+# Use es_mu_ratio = 2 for SNES-like
+# Use es_mu_ratio = 0 to use es_mu instead

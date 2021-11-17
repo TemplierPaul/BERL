@@ -110,7 +110,7 @@ class Secondary:
         env = make_env(self.config["env"], seed=seed)
         agent = self.make_agent(genome)
 
-        # Virtual batch normalization
+        # Virtual batch normalization 
         agent.model(self.vb)
 
         agent.state.reset()
