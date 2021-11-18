@@ -173,14 +173,15 @@ class Primary(Secondary):
 
         vb = []
         env.reset()
+        vb_rng = np.random.default_rng(seed=123)
         while len(vb) < 128:
             # Apply random action and with 1% chance save this state.
-            a =  np.random.randint(0, self.config["n_actions"])
+            a =  vb_rng.integers(0, self.config["n_actions"])
             obs, _, done, _ = env.step(a)
             state.update(obs)
             if done:
                 env.reset()
-            elif np.random.rand() < 0.01:
+            elif vb_rng.random() < 0.01:
                 vb.append(state.get())
 
         self.vb = torch.stack(vb).squeeze().double()
