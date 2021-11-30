@@ -80,7 +80,7 @@ class NeuroEvo:
         # \u03BB = lambda
         frames = self.logger.last("total frames") 
         fit = np.mean(self.logger["fitness"][-10:]) if len(self.logger["fitness"])>0 else "\u2205"
-        return f"NeuroEvo [{self.optim}]({self.config['pop']}/{self.MPINode.size}) | Fit:{fit:.2f} | Frames:{to_units(frames)}"     
+        return f"{self.config['env']} NeuroEvo [{self.optim}]({self.config['pop']}/{self.MPINode.size}) | Fit:{fit:.2f} | Frames:{to_units(frames)}"     
 
     ### Setup ###
 

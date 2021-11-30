@@ -107,7 +107,7 @@ class Secondary:
         if seed < 0:
             seed = np.random.randint(0, 1000000000)
         seed=0
-        env = make_env(self.config["env"], seed=seed)
+        env = make_env(self.config["env"], seed=seed, render=render)
         agent = self.make_agent(genome)
 
         # Virtual batch normalization 

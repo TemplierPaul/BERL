@@ -2,8 +2,12 @@ from .atari import *
 from .brax import *
 from .gym import *
 from .minatar import *
+from .procgen import *
 
-def make_env(env_id, seed=None):
+def is_procgen(name):
+    return name.split("-")[0] in procgen.env.ENV_NAMES
+
+def make_env(env_id, seed=None, render=False):
     """
     Utility function for multiprocessed env.
     
@@ -24,6 +28,7 @@ def make_env(env_id, seed=None):
         if seed is not None: env.seed(seed)
         return env
 
+    # Minatar
     elif env_id in MINATAR_ENVS:
         env=MinatarEnv(env_id)
         if seed is not None: env.seed(seed)
@@ -31,6 +36,12 @@ def make_env(env_id, seed=None):
         env = TorchTransposeWrapper(env)
         return env
 
+    # Procgen envs
+    elif is_procgen(env_id):
+        env = make_procgen_env(env_id, seed=seed, render=render)
+        return env
+        
+    # Atari envs
     else:
         env = gym.make(env_id)
         n_in = env.observation_space.shape

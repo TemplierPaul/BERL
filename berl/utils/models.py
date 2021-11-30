@@ -9,6 +9,15 @@ from collections import namedtuple
 
 from ..env import MinatarEnv, CartPoleSwingUp, CustomMountainCarEnv
 from .layers import *
+from .impala import *
+
+NETWORKS={}
+
+def register(name):
+    def wrapped(func):
+        NETWORKS[name]=func
+        return func
+    return wrapped
 
 def get_genome_size(Net, c51=False):
     model = Net(c51=c51)
@@ -18,7 +27,6 @@ def get_genome_size(Net, c51=False):
     return len(vec.cpu().numpy())
 
 # Flat net for Atari RAM and gym envs
-
 class FFNet(nn.Module):
     def __init__(self, n_in, h_size, n_out):
         super().__init__()
@@ -37,7 +45,8 @@ class FFNet(nn.Module):
 
         x = self.fc3(x)
         return x
-    
+
+@register("flat")
 def gym_flat_net(env_name, h_size=64):
     if env_name.lower() == "swingup": 
         env = CartPoleSwingUp()
@@ -78,6 +87,7 @@ class ConvNet(nn.Module):
         x = self.fc2(x)
         return x
 
+@register("conv")
 def gym_conv(env_name, h_size=512):
     env=gym.make(env_name)
     n_out = env.action_space.n
@@ -137,6 +147,7 @@ class CanonicalNet(nn.Module):
 
         return x
 
+@register("canonical")
 def gym_canonical(env_name, h_size=512):
     env=gym.make(env_name)
     n_out = env.action_space.n
@@ -169,6 +180,7 @@ class DataEfficientConvNet(nn.Module):
         x = self.fc2(x)
         return x
 
+@register("efficientconv")
 def gym_conv_efficient(env_name, h_size=256):
     env=gym.make(env_name)
     n_out = env.action_space.n
@@ -218,6 +230,7 @@ class MinatarNet(nn.Module):
         # Returns the output from the fully-connected linear layer
         return self.output(x)
 
+@register("min")
 def min_conv(env_name):
     env = MinatarEnv(env_name)
     num_actions= env.action_space.n
@@ -227,4 +240,18 @@ def min_conv(env_name):
             return MinatarNet(in_channels, num_actions*51)
         else:
             return MinatarNet(in_channels, num_actions)
+    return wrapped
+
+@register("impala")
+def impala(env_name, h_size=512):
+    env_name = env_name.split("-")[0]
+    env=gym.make(f"procgen:procgen-{env_name}-v0")
+    n_out = env.action_space.n
+    env.close()
+    n_channels=3
+    def wrapped(c51=False):
+        if c51:
+            return ImpalaModel(n_out=n_out*51, stacks=n_channels)
+        else:
+            return ImpalaModel(n_out=n_out, stacks=n_channels)
     return wrapped
