@@ -11,7 +11,7 @@ setup(
    long_description=open('README.md').read(),
    install_requires=[
        "torch", "gym", "matplotlib", "numpy", "dopamine-rl", "stable-baselines3",
-       "stable-baselines3[extra]", "tqdm", "wandb", "cma"
+       "stable-baselines3[extra]", "tqdm", "wandb", "cma", "procgen"
    ],
 )
 

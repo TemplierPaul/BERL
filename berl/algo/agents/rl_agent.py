@@ -110,12 +110,9 @@ class Agent:
         return loss
 
     def backprop(self, loss): # pragma: no cover
-        # loss = self.dqn_loss(*transitions)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        # self.update_target()
-        # self.genes = self.get_params()
         return self
 
     def __eq__(self, other): 

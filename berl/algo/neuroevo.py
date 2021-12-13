@@ -43,6 +43,13 @@ def to_units(n):
 
 class NeuroEvo:
     def __init__(self, Net, config, save_path=None):
+        """
+        Evolution strategy for neural networks.
+        Args:
+            Net: Neural network class
+            config: dict
+            save_path: str
+        """
         self.config = config
         self.Net = Net
 

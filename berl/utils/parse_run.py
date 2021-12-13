@@ -45,24 +45,20 @@ ALGOS = {
     "neuroevo":NeuroEvo
 }
 
-# NETWORKS = {
-#     "flat":gym_flat_net,
-#     "conv":gym_conv,
-#     "efficientconv": gym_conv_efficient,
-#     "canonical":gym_canonical,
-#     "min":min_conv
-# }
 
-def load_preset(args):
+def load_preset(args, folder=None):
+    if folder is None:
+        folder = presets_folder
     # Load default values
-    default_file = open(f"{presets_folder}/_default.yaml", 'r')
-    default = yaml.load(default_file)
+    # print("Loading default: ", f"{folder}/_default.yaml")
+    with open(f"{folder}/_default.yaml", 'r') as default_file:
+        default = yaml.load(default_file)
 
     # Loat presets
     if args.preset is not None:
         preset_list = args.preset
         for p in preset_list:
-            yaml_file = open(f"{presets_folder}/{p}.yaml", 'r')
+            yaml_file = open(f"{folder}/{p}.yaml", 'r')
             yaml_content = yaml.load(yaml_file)
             default = {**default, **yaml_content}
 
@@ -74,11 +70,13 @@ def load_preset(args):
     args.__dict__ = default
     return args
 
-def set_xp(args):  
+def set_xp(args, folder=None):  
+    if folder is None:
+        folder = presets_folder
     if isinstance(args, str):
         args, unknown = parser.parse_known_args(args.split())
 
-    args = load_preset(args)
+    args = load_preset(args, folder)
 
     algo = ALGOS[args.algo.lower()]
     net = NETWORKS[args.net.lower()](args.env)
@@ -98,7 +96,7 @@ def set_xp(args):
 
     return pb
 
-def load_xp(path, gen=None):
+def load_xp(path, gen=None, folder=None):
     # Config
     config_path = path + "/config.json"
     cfg = glob(config_path)
@@ -108,7 +106,7 @@ def load_xp(path, gen=None):
     with open(cfg[0], 'r') as f:
         args.__dict__ = json.load(f)
     args.preset=[]
-    pb = set_xp(args)
+    pb = set_xp(args, folder)
 
     save_path = f"{path}/checkpoint_*.npz"
     checkpoints = glob(save_path)
@@ -141,21 +139,26 @@ def run_xp(args):
     #     pass
     return pb
 
-# Get default config
-args, unknown = parser.parse_known_args()
-args = load_preset(args)
-cfg = args.__dict__
-# Add each argument in the yaml file to the parser
-for k, v in cfg.items():
-    if isinstance(v, str):
-        parser.add_argument(f'--{k}', type=str)
-    elif isinstance(v, bool):
-        parser.add_argument(f'--{k}', default=None, action='store_true')
-    elif isinstance(v, int):
-        parser.add_argument(f'--{k}', type=int)
-    elif isinstance(v, float):
-        parser.add_argument(f'--{k}', type=float)
-    elif isinstance(v, list):
-        assert k =="preset"
-    else:
-        raise NotImplementedError(f"Argument error: {k} ({v})")
+def get_default(parser, folder):
+    # Get default config
+    args, unknown = parser.parse_known_args()
+    args = load_preset(args, folder)
+    cfg = args.__dict__
+    # Add each argument in the yaml file to the parser
+    for k, v in cfg.items():
+        if f"--{k}" in parser._option_string_actions.keys():
+            continue
+        if isinstance(v, str):
+            parser.add_argument(f'--{k}', type=str)
+        elif isinstance(v, bool):
+            parser.add_argument(f'--{k}', default=None, action='store_true')
+        elif isinstance(v, int):
+            parser.add_argument(f'--{k}', type=int)
+        elif isinstance(v, float):
+            parser.add_argument(f'--{k}', type=float)
+        elif isinstance(v, list):
+            assert k =="preset"
+        else:
+            raise NotImplementedError(f"Argument error: {k} ({v})")
+    return parser
+

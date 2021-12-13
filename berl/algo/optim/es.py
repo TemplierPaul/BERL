@@ -63,11 +63,16 @@ class ES:
         self.fitnesses = None
         return self.noise_index
 
-    def tell(self, noise_id, fit):
+    def tell(self, noise_id, fit=None, pop=None):
         assert len(noise_id) == self.n_pop
         self.noise_index = noise_id
         self.fitnesses = fit
-        self.update()
+        if pop is not None:
+            self.update_from_population(pop)
+        elif fir is not None:
+            self.update()
+        else:
+            raise ValueError("No population or fitnesses given")
         self.gen += 1
 
     @abstractmethod
@@ -76,6 +81,10 @@ class ES:
 
     @abstractmethod
     def update(self): # pragma: no cover
+        pass
+
+    @abstractmethod
+    def update_from_population(self, pop): # pragma: no cover
         pass
 
     def export(self):

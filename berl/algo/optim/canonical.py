@@ -19,11 +19,11 @@ class Canonical(ES):
         self.w /= np.sum(self.w)
 
         # Noise adaptation stuff.
-        self.p_sigma = np.zeros(self.n_genes)
-        self.u_w = 1 / float(np.sum(np.square(self.w)))
-        self.c_sigma = (self.u_w + 2) / (self.n_genes + self.u_w + 5)
-        self.c_sigma *= self.c_sigma_factor
-        self.const_1 = np.sqrt(self.u_w * self.c_sigma * (2 - self.c_sigma))
+        # self.p_sigma = np.zeros(self.n_genes)
+        # self.u_w = 1 / float(np.sum(np.square(self.w)))
+        # self.c_sigma = (self.u_w + 2) / (self.n_genes + self.u_w + 5)
+        # self.c_sigma *= self.c_sigma_factor
+        # self.const_1 = np.sqrt(self.u_w * self.c_sigma * (2 - self.c_sigma))
 
         # self.s = None
 
@@ -63,4 +63,25 @@ class Canonical(ES):
         # self.p_sigma = (1 - self.c_sigma) * self.p_sigma + self.const_1 * step
         # self.sigma = self.sigma * np.exp((self.c_sigma / 2) * (np.sum(np.square(self.p_sigma)) / self.n_genes - 1))
 
-    
+    def update_from_population(self, pop):
+        d = self.n_genes
+        n = self.n_pop
+
+        fitnesses = pop.get_fitness()
+        inv_fitnesses = [- f for f in fitnesses]
+        idx = np.argsort(inv_fitnesses) # indices from highest fitness to lowest
+
+        step = np.zeros(d)
+        # print("Update")
+        for i in range(self.mu):
+            genes = pop.get_indiv(idx[i])
+            s = self.back_random(genes_after=genes)
+            f = self.fitnesses[idx[i]]
+            step += self.w[i] * s
+
+        self.step = self.lr * self.sigma * step
+        self.theta += self.step
+
+        # Noise adaptation stuff.
+        # self.p_sigma = (1 - self.c_sigma) * self.p_sigma + self.const_1 * step
+        # self.sigma = self.sigma * np.exp((self.c_sigma / 2) * (np.sum(np.square(self.p_sigma)) / self.n_genes - 1))

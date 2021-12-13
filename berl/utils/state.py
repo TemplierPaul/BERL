@@ -21,10 +21,13 @@ class State():
     def __str__(self): # pragma: no cover
         return self.__repr__()
 
-    def get(self):
+    def get(self, as_tensor=True):
         if self.state is None:
             return None
-        return torch.tensor(self.state).double().unsqueeze(0)
+        if as_tensor:
+            return torch.tensor(self.state).double().unsqueeze(0)
+        else:
+            return self.state
 
 
 class FrameStackState(State):
@@ -48,11 +51,16 @@ class FrameStackState(State):
     def reset(self):
         self.state = np.zeros(self.shape)
         
-    def get(self):
-        x = torch.from_numpy(self.state).to(torch.uint8)
-        x = torch.swapaxes(x, 0, 1)
-        return x / 255
-        
+    def get(self, as_tensor=True):
+        if self.state is None:
+            return None
+        if as_tensor:
+            x = torch.from_numpy(self.state).to(torch.uint8)
+            x = torch.swapaxes(x, 0, 1)
+            return x / 255
+        else:
+            return self.state
+
     def plot(self): # pragma: no cover
         plt.figure(figsize=(10, 10))
         for i in range(4):

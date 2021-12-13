@@ -57,12 +57,16 @@ class OpenAI(ES):
         self.sample_symmetry()
         # self.genomes = [self.theta + self.sigma * self.s[:, i] for i in range(self.n_pop)]
         return self  
+
+    def back_random(self, genes_after):
+        # Compute the s that would have created that genome
+        s = (genes_after - self.theta)/self.sigma
+        assert (s != s).sum() == 0 # check for NaNs
+        return s
     
     def update(self):
         d = self.n_genes
         n = self.n_pop
-        
-        # self.s = np.array([self.back_random(i) for i in self.genomes]).transpose()
 
         self.w = compute_centered_ranks(self.fitnesses)
         
@@ -70,6 +74,22 @@ class OpenAI(ES):
         for i in range(self.n_pop):
             noise_i = self.noise_index[i] # Get noise index 
             s = self.get_noise(noise_i) # Get noise 
+            gradient += self.w[i] * s 
+        
+        gradient /= self.sigma * self.n_pop
+        self.theta += self.gradient_optim.step(gradient)
+
+    def update_from_population(self, pop):
+        d = self.n_genes
+        n = self.n_pop
+        
+        fitnesses = pop.get_fitness()
+        self.w = compute_centered_ranks(inv_fitnesses)
+        
+        gradient = np.zeros(d)
+        for i in range(self.n_pop):
+            genes = pop.get_indiv(idx[i])
+            s = self.back_random(genes_after=genes)
             gradient += self.w[i] * s 
         
         gradient /= self.sigma * self.n_pop

@@ -51,4 +51,25 @@ class SNES(ES):
         # Bound sigma to (0.01, 1000) to avoid NaN
         self.sigma = np.array([min(max(i, 0.01), 1000) for i in new_sigma])
 
-    
+    def update_from_population(self, pop):
+        d =self.n_genes
+        n = self.n_pop
+
+        inv_fitnesses = [- f for f in self.fitnesses]
+        idx = np.argsort(inv_fitnesses) # indices from highest fitness to lowest
+        
+        # Compute gradients
+        grad_theta = np.zeros(d)
+        grad_sigma = np.zeros(d)
+        
+        for i in range(n):
+            genes = pop.get_indiv(idx[i])
+            s = self.back_random(genes_after=genes)
+            grad_theta += self.w[i] * s
+            grad_sigma += self.w[i] * (s **2 - 1)
+        
+        # Update variables
+        self.theta += self.eta_mu * self.sigma * grad_theta
+        new_sigma = self.sigma * np.exp(self.eta_sigma * grad_sigma)
+        # Bound sigma to (0.01, 1000) to avoid NaN
+        self.sigma = np.array([min(max(i, 0.01), 1000) for i in new_sigma])

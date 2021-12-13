@@ -3,6 +3,7 @@ from berl import *
 comm = MPI.COMM_WORLD
 size = comm.Get_size() # new: gives number of ranks in comm
 rank = comm.Get_rank()
+parser = get_default(parser, folder=presets_folder)
 
 if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
