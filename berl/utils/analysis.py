@@ -38,7 +38,7 @@ class WandBProject:
             run = self.runs[run]
         env_name = run.config["env"]
         algo = run.config["optim"]
-        artifact_name = f"{env_name}_{algo}_{run.name}"
+        artifact_name = f"{env_name}_{algo}_{run.id}"
         artifact_path = f"{self.entity}/{self.project}/{artifact_name}:{version}"
         resume_run = wandb.init(project=self.project, entity=self.entity, id=run.id, resume="must")
         artifact = resume_run.use_artifact(artifact_path, type=env_name)

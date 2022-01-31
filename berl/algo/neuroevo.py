@@ -202,7 +202,7 @@ class NeuroEvo:
             config=self.get_config()
         )
         print("wandb run:", wandb.run.name)
-        self.wandb_save_name = f'{self.config["env"]}_{self.config["optim"]}_{wandb.run.name}'
+        self.wandb_save_name = f'{self.config["env"]}_{self.config["optim"]}_{wandb.run.id}'
     
     def close_wandb(self): 
         if self.wandb_run is not None: # pragma: no cover
