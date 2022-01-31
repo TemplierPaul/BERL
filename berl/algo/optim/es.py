@@ -69,7 +69,7 @@ class ES:
         self.fitnesses = fit
         if pop is not None:
             self.update_from_population(pop)
-        elif fir is not None:
+        elif fit is not None:
             self.update()
         else:
             raise ValueError("No population or fitnesses given")

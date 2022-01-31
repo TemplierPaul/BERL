@@ -13,11 +13,17 @@ def make_procgen_env(env_id, seed, render=False):
     if env_type == "simple":
         env_type = "easy"
         simple_graphics = True
+    
+    if seed is None:
+        seed = 0
+
+    print("Level", seed)
 
     env = procgen.gym_registration.make_env(
         env_name=env_name, 
         distribution_mode=env_type,
         rand_seed=seed,
+        start_level=seed,
         use_monochrome_assets= simple_graphics,
         restrict_themes=simple_graphics,
         use_backgrounds=not simple_graphics,

@@ -7,7 +7,7 @@ from .procgen import *
 def is_procgen(name):
     return name.split("-")[0] in procgen.env.ENV_NAMES
 
-def make_env(env_id, seed=None, render=False):
+def make_env(env_id, seed=None, render=False, sticky=False):
     """
     Utility function for multiprocessed env.
     
@@ -54,7 +54,10 @@ def make_env(env_id, seed=None, render=False):
             new_name = f"{l[0]}NoFrameskip-{l[1]}"
 
             env = gym.make(new_name)
-            env = wrap_canonical(env)
+            if sticky:
+                env = wrap_sticky(env)
+            else:
+                env = wrap_canonical(env)
         if seed is not None: env.seed(seed)
         return env
 

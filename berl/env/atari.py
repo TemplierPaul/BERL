@@ -123,6 +123,39 @@ class MaxAndSkipEnv(gym.Wrapper):
     def reset(self, **kwargs):
         return self.env.reset(**kwargs)
 
+class StickyMaxAndSkipEnv(gym.Wrapper):
+    def __init__(self, env, stickiness=0.25):
+        """Return only every `skip`-th frame"""
+        gym.Wrapper.__init__(self, env)
+        # most recent raw observations (for max pooling across time steps)
+        self._obs_buffer = np.zeros((2,)+env.observation_space.shape, dtype=np.uint8)
+        self._stickiness = stickiness
+
+    def step(self, action):
+        """Sticky action, sum reward, and max over last observations."""
+        total_reward = 0.0
+        done = None
+
+        skip = 0
+        while np.random.random() >= self._stickiness:
+            skip += 1
+            
+        for i in range(skip):
+            obs, reward, done, info = self.env.step(action)
+            if i == self._skip - 2: self._obs_buffer[0] = obs
+            if i == self._skip - 1: self._obs_buffer[1] = obs
+            total_reward += reward
+            if done:
+                break
+        # Note that the observation on the done=True frame
+        # doesn't matter
+        max_frame = self._obs_buffer.max(axis=0)
+
+        return max_frame, total_reward, done, info
+
+    def reset(self, **kwargs):
+        return self.env.reset(**kwargs)
+
 class ClipRewardEnv(gym.RewardWrapper):
     def __init__(self, env):
         gym.RewardWrapper.__init__(self, env)
@@ -313,8 +346,30 @@ def wrap_canonical(env):
     env = TorchTransposeWrapper(env)
     return env
 
+def wrap_sticky(env):
+    """Apply a common set of wrappers for Atari games, similar to the Canonical ES paper"""
+    assert 'NoFrameskip' in env.spec.id
 
-##### Wrapper to fir to Pytorch
+    # Sample initial states by taking random number of no-ops on reset
+    env = NoopResetEnv(env, noop_max=30)
+
+    # Frame skipping
+    # fs = 3 if "SpaceInvaders" in env.spec.id else 4
+    env = StickyMaxAndSkipEnv(env, skip=0.25)
+    
+    # For environments where the user need to press FIRE for the game to start
+    if 'FIRE' in env.unwrapped.get_action_meanings():
+        env = FireResetEnv(env)
+
+    # Warp frames to 84x84 as done in the Nature paper and later work.
+    env = WarpFrame(env)
+
+    # Re-order channels, from HxWxC to CxHxW for Pytorch
+    env = TorchTransposeWrapper(env)
+    return env
+
+
+##### Wrapper to fit to Pytorch
 
 from gym import spaces
 

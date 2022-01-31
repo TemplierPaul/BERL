@@ -66,6 +66,7 @@ class NeuroEvo:
         )
 
         self.save_path = save_path
+        self.wandb_save_name = None
         self.wandb_run = None
 
         self.noise_index = None
@@ -133,7 +134,7 @@ class NeuroEvo:
     def train(self, steps=None):
         if steps is None:
             steps = self.config["gen"]
-        pbar = tqdm(range(steps))  
+        pbar = tqdm(range(steps))
         try:
             for i in pbar:
                 self.step()
@@ -143,6 +144,7 @@ class NeuroEvo:
                 stop, stop_msg = self.stop()
                 if stop:
                     print(stop_msg)
+                    self.save(self.save_path)
                     break
         except KeyboardInterrupt:
             print("Interrupted")
@@ -150,10 +152,10 @@ class NeuroEvo:
             # self.close_MPI()
             self.close_wandb()
 
-    def render(self, n=1):
+    def render(self, n=1, seed=-1):
         fitnesses = []
         for _ in range(n):
-            f = self.MPINode.evaluate(self.hof.genes, render=True, seed=-1)
+            f = self.MPINode.evaluate(self.hof.genes, render=True, seed=seed)
             print(f)
             fitnesses.append(f)
         print(f"Mean over {n} runs: {np.mean(fitnesses)}")
@@ -200,6 +202,7 @@ class NeuroEvo:
             config=self.get_config()
         )
         print("wandb run:", wandb.run.name)
+        self.wandb_save_name = f'{self.config["env"]}_{self.config["optim"]}_{wandb.run.name}'
     
     def close_wandb(self): 
         if self.wandb_run is not None: # pragma: no cover
@@ -249,6 +252,20 @@ class NeuroEvo:
             np.savez_compressed(save_path, **d)
             
             print(f"Saved at {save_path}")
+
+            if self.wandb_run is not None:
+                wandb_path = f"{path}/{self.wandb_run.id}.npy"
+                genome = self.hof.genes
+                with open(wandb_path, 'wb') as f:
+                    np.save(f, genome)
+
+                artifact = wandb.Artifact(
+                    self.wandb_save_name, 
+                    type = self.config["env"],
+                    metadata = self.config                    
+                    )
+                artifact.add_file(wandb_path)
+                self.wandb_run.log_artifact(artifact)
 
     def load(self, d):
         self.hof = Indiv(d["hof_genes"], d["hof_fit"])
