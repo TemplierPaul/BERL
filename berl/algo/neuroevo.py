@@ -259,7 +259,10 @@ class NeuroEvo:
                 vb = self.MPINode.vb
                 if vb is not None:
                     vb_path = f"{path}/vb.npz"
-                    np.savez_compressed(vb_path, **vb)
+                    # vb is a torchg tensor, save it as a numpy array
+                    vb = vb.numpy()
+                    with open(vb_path, 'wb') as f:
+                        np.save(f, vb)
                     print(f"Saved virtual batch at {vb_path}")
 
             if self.wandb_run is not None:

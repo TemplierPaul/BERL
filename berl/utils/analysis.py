@@ -45,7 +45,7 @@ class WandBProject:
         artifact = resume_run.use_artifact(net_path, type=env_name)
         artifact_dir = artifact.download()
         cfg = artifact.metadata
-        path = glob(artifact_dir+"/*_net*")[0]
+        path = glob(artifact_dir+"/*")[0]
         print(f"Loading Artifact from {path}")
         with open(path, 'rb') as f:
             genome = np.load(f)
@@ -54,7 +54,7 @@ class WandBProject:
         vb_path = f"{self.entity}/{self.project}/{artifact_name}_vb:{version}"
         artifact = resume_run.use_artifact(vb_path, type=env_name)
         artifact_dir = artifact.download()
-        path = glob(artifact_dir+"/*_vb*")[0]
+        path = glob(artifact_dir+"/*")[0]
         print(f"Loading Artifact from {path}")
         with open(path, 'rb') as f:
             vb = np.load(f)
@@ -69,6 +69,7 @@ class Evaluator(Primary):
         self.config = None
         self.Net = None
         self.n_out = None
+        self.vb = None
 
     def __repr__(self):
         return f"Evaluator"
@@ -76,12 +77,12 @@ class Evaluator(Primary):
     def __str__(self):
         return self.__repr__()
         
-    def load(self, config, genome):
+    def load(self, config, genome, vb):
         self.config = config
         self.Net = NETWORKS[config["net"].lower()](config["env"])
         self.agent = self.make_agent(genome)
          # Virtual batch normalization
-        self.get_vb()
+        self.vb = torch.tensor(vb)
         self.agent.model(self.vb)
         return self
         
