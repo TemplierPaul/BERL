@@ -159,6 +159,12 @@ class Primary(Secondary):
     def __repr__(self):
         return f"Primary ({self.size})"
 
+    def genome_vb(self, genome):
+        agent = self.make_agent(genome)
+
+        # Virtual batch normalization
+        agent.model(self.vb)
+
     def get_vb(self):
         if self.n_out is None:
             self.get_n_out()

@@ -253,6 +253,15 @@ class NeuroEvo:
             
             print(f"Saved at {save_path}")
 
+            # Save Virtual batch
+            vb = None
+            if self.MPINode is not None:
+                vb = self.MPINode.vb
+                if vb is not None:
+                    vb_path = f"{path}/vb.npz"
+                    np.savez_compressed(vb_path, **vb)
+                    print(f"Saved virtual batch at {vb_path}")
+
             if self.wandb_run is not None:
                 wandb_path = f"{path}/{self.wandb_run.id}.npy"
                 genome = self.hof.genes
@@ -260,12 +269,22 @@ class NeuroEvo:
                     np.save(f, genome)
 
                 artifact = wandb.Artifact(
-                    self.wandb_save_name, 
+                    self.wandb_save_name + "_net", 
                     type = self.config["env"],
                     metadata = self.config                    
                     )
                 artifact.add_file(wandb_path)
                 self.wandb_run.log_artifact(artifact)
+
+                # Add vb artifact
+                if vb is not None:
+                    artifact = wandb.Artifact(
+                        self.wandb_save_name + "_vb", 
+                        type = self.config["env"],
+                        metadata = self.config                    
+                        )
+                    artifact.add_file(vb_path)
+                    self.wandb_run.log_artifact(artifact)
 
     def load(self, d):
         self.hof = Indiv(d["hof_genes"], d["hof_fit"])

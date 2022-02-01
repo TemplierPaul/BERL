@@ -39,17 +39,27 @@ class WandBProject:
         env_name = run.config["env"]
         algo = run.config["optim"]
         artifact_name = f"{env_name}_{algo}_{run.id}"
-        artifact_path = f"{self.entity}/{self.project}/{artifact_name}:{version}"
+        # Get genome
+        net_path = f"{self.entity}/{self.project}/{artifact_name}_net:{version}"
         resume_run = wandb.init(project=self.project, entity=self.entity, id=run.id, resume="must")
-        artifact = resume_run.use_artifact(artifact_path, type=env_name)
+        artifact = resume_run.use_artifact(net_path, type=env_name)
         artifact_dir = artifact.download()
         cfg = artifact.metadata
-        path = glob(artifact_dir+"/*")[0]
+        path = glob(artifact_dir+"/*_net*")[0]
         print(f"Loading Artifact from {path}")
         with open(path, 'rb') as f:
             genome = np.load(f)
+
+        # Get virtual batch
+        vb_path = f"{self.entity}/{self.project}/{artifact_name}_vb:{version}"
+        artifact = resume_run.use_artifact(vb_path, type=env_name)
+        artifact_dir = artifact.download()
+        path = glob(artifact_dir+"/*_vb*")[0]
+        print(f"Loading Artifact from {path}")
+        with open(path, 'rb') as f:
+            vb = np.load(f)
             
-        return genome, resume_run
+        return genome, resume_run, vb
 
 
 # Evaluate an agent on different environments
