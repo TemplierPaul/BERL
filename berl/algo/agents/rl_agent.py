@@ -63,6 +63,14 @@ class Agent:
             actions = self.model(x).cpu().detach().numpy()
         return int(np.argmax(actions))
 
+    def continuous_act(self, obs):
+        # continuous actions 
+        self.state.update(obs)
+        with torch.no_grad():
+            x = self.state.get().to(self.device).double()
+            actions = self.model(x).cpu().detach().numpy()
+        return actions
+
     def set_optim(self):
         if 'SGD' not in self.config.keys():
             self.config["SGD"] = "Adam"

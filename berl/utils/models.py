@@ -26,6 +26,9 @@ def get_genome_size(Net, c51=False):
         vec = torch.nn.utils.parameters_to_vector(params)
     return len(vec.cpu().numpy())
 
+def get_n_out(env):
+    return env.action_space.n if isinstance(env.action_space, gym.spaces.Discrete) else env.action_space.shape[0]
+
 # Flat net for Atari RAM and gym envs
 class FFNet(nn.Module):
     def __init__(self, n_in, h_size, n_out):
@@ -54,7 +57,7 @@ def gym_flat_net(env_name, h_size=64):
         env = CustomMountainCarEnv()
     else:
         env=gym.make(env_name)
-    n_out = env.action_space.n
+    n_out = get_n_out(env)
     n_in = env.observation_space.shape[0]
     env.close()	
     def wrapped(c51=False):
@@ -90,7 +93,7 @@ class ConvNet(nn.Module):
 @register("conv")
 def gym_conv(env_name, h_size=512):
     env=gym.make(env_name)
-    n_out = env.action_space.n
+    n_out = get_n_out(env)
     env.close()
     def wrapped(c51=False):
         if c51:
@@ -150,7 +153,7 @@ class CanonicalNet(nn.Module):
 @register("canonical")
 def gym_canonical(env_name, h_size=512):
     env=gym.make(env_name)
-    n_out = env.action_space.n
+    n_out = get_n_out(env)
     env.close()
     def wrapped(c51=False):
         if c51:
@@ -183,7 +186,7 @@ class DataEfficientConvNet(nn.Module):
 @register("efficientconv")
 def gym_conv_efficient(env_name, h_size=256):
     env=gym.make(env_name)
-    n_out = env.action_space.n
+    n_out = get_n_out(env)
     env.close()
     def wrapped(c51=False):
         if c51:
@@ -246,7 +249,7 @@ def min_conv(env_name):
 def impala(env_name, h_size=512):
     env_name = env_name.split("-")[0]
     env=gym.make(f"procgen:procgen-{env_name}-v0")
-    n_out = env.action_space.n
+    n_out = get_n_out(env)
     env.close()
     n_channels=3
     def wrapped(c51=False):

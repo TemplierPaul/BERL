@@ -4,6 +4,7 @@ from ...env.env import make_env
 from .rl_agent import Agent, State, FrameStackState
 from .c51_agent import C51Agent
 import torch
+import gym
 
 
 class Secondary:
@@ -13,6 +14,7 @@ class Secondary:
 
         env = make_env(config["env"])
         self.config["obs_shape"] = env.observation_space.shape
+        self.discrete = isinstance(env.action_space, gym.spaces.Discrete)
         env.close()
 
         self.comm = MPI.COMM_WORLD
@@ -117,7 +119,10 @@ class Secondary:
             done = False
 
             while not done and n_frames < self.config["episode_frames"]:
-                action = agent.act(obs)
+                if self.discrete:
+                    action = agent.act(obs)
+                else:
+                    action = agent.continuous_act(obs)
                 obs, r, done, _ = env.step(action)
 
                 if self.config["reward_clip"] > 0:

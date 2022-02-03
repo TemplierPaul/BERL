@@ -7,6 +7,27 @@ from .procgen import *
 def is_procgen(name):
     return name.split("-")[0] in procgen.env.ENV_NAMES
 
+MUJOCO_ENVS = [
+    "Ant-v2",
+    "HalfCheetah-v2",
+    "Hopper-v2",
+    "Humanoid-v2",
+    "InvertedPendulum-v2",
+    "InvertedDoublePendulum-v2",
+    "Reacher-v2",
+    "Swimmer-v2",
+    "Walker2d-v2",
+    "Ant-v3",
+    "HalfCheetah-v3",
+    "Hopper-v3",
+    "Humanoid-v3",
+    "InvertedPendulum-v3",
+    "InvertedDoublePendulum-v3",
+    "Reacher-v3",
+    "Swimmer-v3",
+    "Walker2d-v3",
+]
+
 def make_env(env_id, seed=None, render=False, sticky=False):
     """
     Utility function for multiprocessed env.
@@ -34,6 +55,12 @@ def make_env(env_id, seed=None, render=False, sticky=False):
         if seed is not None: env.seed(seed)
         # Re-order channels, from HxWxC to CxHxW for Pytorch
         env = TorchTransposeWrapper(env)
+        return env
+
+    # Mujoco
+    elif env_id in MUJOCO_ENVS:
+        env = gym.make(env_id)
+        if seed is not None: env.seed(seed)
         return env
 
     # Procgen envs

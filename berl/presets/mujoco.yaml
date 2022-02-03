@@ -1,0 +1,11 @@
+# Mujoco
+env: Ant-v2  # Env
+net: flat # Network
+gen: 1000          # Number of generations to run
+max_frames: 200000 # Total frames
+max_evals: 10000  # Total episodes
+episode_frames: 10000  # Max frames per episode
+
+save_freq: 10     # Number of generations between saving population
+eval_freq: 10     # Number of generations between evaluating the elite
+
