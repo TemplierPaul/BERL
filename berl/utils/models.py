@@ -67,6 +67,44 @@ def gym_flat_net(env_name, h_size=64):
             return FFNet(n_in, h_size, n_out)
     return wrapped
 
+class MujocoNet(nn.Module):
+    def __init__(self, n_in, h_size, n_out):
+        super().__init__()
+        self.fc1 = nn.Linear(n_in, h_size)
+        self.fc2 = nn.Linear(h_size, h_size)
+        self.fc3 = nn.Linear(h_size, n_out)
+
+        self.n_out=n_out
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = F.tanh(x)
+
+        x = self.fc2(x)
+        x = F.tanh(x)
+
+        x = self.fc3(x)
+        return x
+
+
+@register("mujoco")
+def mujoco_flat_net(env_name, h_size=256):
+    if env_name.lower() == "swingup": 
+        env = CartPoleSwingUp()
+    elif env_name.lower() == "custommc": 
+        env = CustomMountainCarEnv()
+    else:
+        env=gym.make(env_name)
+    n_out = get_n_out(env)
+    n_in = env.observation_space.shape[0]
+    env.close()	
+    def wrapped(c51=False):
+        if c51:
+            return MujocoNet(n_in, h_size, n_out*51)
+        else:
+            return MujocoNet(n_in, h_size, n_out)
+    return wrapped
+
 ## Atari image
 
 class ConvNet(nn.Module):

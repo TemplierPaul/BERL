@@ -16,16 +16,7 @@ MUJOCO_ENVS = [
     "InvertedDoublePendulum-v2",
     "Reacher-v2",
     "Swimmer-v2",
-    "Walker2d-v2",
-    "Ant-v3",
-    "HalfCheetah-v3",
-    "Hopper-v3",
-    "Humanoid-v3",
-    "InvertedPendulum-v3",
-    "InvertedDoublePendulum-v3",
-    "Reacher-v3",
-    "Swimmer-v3",
-    "Walker2d-v3",
+    "Walker2d-v2"
 ]
 
 def make_env(env_id, seed=None, render=False, sticky=False):
