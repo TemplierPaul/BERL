@@ -1,3 +1,2 @@
 optim: snes
 es_sigma: 0.01
-es_eta_mu: 1

@@ -8,4 +8,3 @@ episode_frames: 10000  # Max frames per episode
 
 save_freq: 10     # Number of generations between saving population
 eval_freq: 10     # Number of generations between evaluating the elite
-

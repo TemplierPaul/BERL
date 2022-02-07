@@ -2,7 +2,7 @@
 env: Pong-v0  # Env
 net: canonical # Network
 gen: 100000          # Number of generations to run
-max_frames: 1100000000 # Total frames
+max_frames: 1000000000 # Total frames
 max_evals: 10000000  # Total episodes
 episode_frames: 27000  # Max frames per episode
 stack_frames: 4   # Frames to stack
