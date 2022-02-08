@@ -1,8 +1,8 @@
 # Mujoco
 env: Ant-v2  # Env
-net: mujoco # Network
+net: mujoco-light # Network
 gen: 1000          # Number of generations to run
-max_frames: 5000000 # Total frames
+max_frames: 50000000 # Total frames
 max_evals: 10000  # Total episodes
 episode_frames: 10000  # Max frames per episode
 

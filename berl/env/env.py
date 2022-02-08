@@ -51,6 +51,7 @@ def make_env(env_id, seed=None, render=False, sticky=False):
     # Mujoco
     elif env_id in MUJOCO_ENVS:
         env = gym.make(env_id)
+        env = ClipActions(env)
         if seed is not None: env.seed(seed)
         return env
 

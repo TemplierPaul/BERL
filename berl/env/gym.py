@@ -5,6 +5,11 @@ import math
 import numpy as np
 from scipy.misc import derivative
 
+class ClipActions(gym.Wrapper):
+    def step(self, action):
+        action = np.clip(action, self.action_space.low, self.action_space.high)
+        return self.env.step(action)
+
 
 class CartPoleSwingUp(gym.Wrapper):
     def __init__(self, env=gym.make('CartPole-v1'), **kwargs):

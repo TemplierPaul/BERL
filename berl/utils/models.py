@@ -84,7 +84,21 @@ class MujocoNet(nn.Module):
         x = F.tanh(x)
 
         x = self.fc3(x)
+        x = F.tanh(x)
         return x
+
+@register("mujoco-light")
+def mujoco_flat_net(env_name, h_size=64):
+    env=gym.make(env_name)
+    n_out = get_n_out(env)
+    n_in = env.observation_space.shape[0]
+    env.close()	
+    def wrapped(c51=False):
+        if c51:
+            return MujocoNet(n_in, h_size, n_out*51)
+        else:
+            return MujocoNet(n_in, h_size, n_out)
+    return wrapped
 
 
 @register("mujoco")
@@ -103,6 +117,44 @@ def mujoco_flat_net(env_name, h_size=256):
             return MujocoNet(n_in, h_size, n_out*51)
         else:
             return MujocoNet(n_in, h_size, n_out)
+    return wrapped
+
+class DiscreteMujocoNet(nn.Module):
+    def __init__(self, n_in, h_size, dim, n_bins=10, low=None, high=None):
+        super().__init__()
+        self.fc1 = nn.Linear(n_in, h_size)
+        self.fc2 = nn.Linear(h_size, h_size)
+        self.n_bins = n_bins
+        self.dim = dim
+        self.fc3 = nn.Linear(h_size, dim*self.n_bins)
+        self.low = low
+        self.high = high
+        self.range = (high - low)[None, :]
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = torch.tanh(x)
+
+        x = self.fc2(x)
+        x = torch.tanh(x)
+
+        x = self.fc3(x)
+        x = torch.tanh(x)
+        x = x.reshape(-1, self.dim, self.n_bins)
+        a = x.argmax(axis=2)
+
+        a = 1. / (self.n_bins - 1) * a * self.range + self.low[None, :]
+        return a
+
+@register("mujoco-discrete")
+def mujoco_flat_net(env_name, h_size=64):
+    env=gym.make(env_name)
+    n_in = env.observation_space.shape[0]
+    adim, ahigh, alow = env.action_space.shape[0], env.action_space.high, env.action_space.low
+    n_bins = 10
+    env.close()	
+    def wrapped(c51=False):
+        return DiscreteMujocoNet(n_in, 64, dim=adim, n_bins=n_bins, low=alow, high=ahigh)
     return wrapped
 
 ## Atari image
