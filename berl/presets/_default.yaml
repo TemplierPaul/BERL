@@ -37,6 +37,7 @@ es_mu: 4
 es_momentum: 0.9
 es_beta1: 0.9
 es_beta2: 0.999
+es_l2coef: 0.005
 es_gradient_optim: Base # Base / SGD / Adam
 
 # Custom

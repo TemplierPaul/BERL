@@ -25,6 +25,7 @@ class OpenAI(ES):
         super().__init__(n_genes, config)
         self.n_pop -= self.n_pop % 2  # Make pop size even
         self.sigma = config["es_sigma"]
+        self.l2coef = config["es_l2coef"]
 
         # Get gradient optimizer
         grad_name = config["es_gradient_optim"].lower()
@@ -94,5 +95,6 @@ class OpenAI(ES):
             s = self.back_random(genes_after=genes)
             gradient += self.w[i] * s
 
-        gradient /= self.sigma * self.n_pop
-        self.theta += self.gradient_optim.step(gradient)
+        gradient /= self.sigma * self.n_pop  # Normalize
+        gradient -= self.l2coef * self.theta  # L2 regularization
+        self.theta += self.gradient_optim.step(gradient)  # Update theta
