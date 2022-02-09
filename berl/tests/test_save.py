@@ -5,28 +5,29 @@ import types
 import torch
 import os
 
+
 def test_save():
     cfg = {
-        "pop":8,
-        "seed":0,
-        "SGD":"Adam",
+        "pop": 8,
+        "seed": 0,
+        "SGD": "Adam",
         "lr": 0.001,
-        "V_min":-1,
-        "V_max":1,
-        "atoms":51,
-        "c51":False,
+        "V_min": -1,
+        "V_max": 1,
+        "atoms": 51,
+        "c51": False,
         'stack_frames': 1
     }
 
     game = "CartPole-v1"
     Net = gym_flat_net(game)
-    
+
     # Make pop
     pop = Population(Net, cfg)
-    a=Agent(Net, cfg).make_network()
+    a = Agent(Net, cfg).make_network()
     n_genes = len(a.genes)
 
-    n_pop=10
+    n_pop = 10
     genomes = [np.random.random(n_genes) for i in range(n_pop)]
     pop.genomes = genomes
 

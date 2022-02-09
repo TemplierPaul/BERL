@@ -127,10 +127,10 @@ class Secondary:
 
                 if self.config["reward_clip"] > 0:
                     r = max(
-                            min(
-                                r, self.config["reward_clip"]
-                                ), -self.config["reward_clip"]
-                            )
+                        min(
+                            r, self.config["reward_clip"]
+                        ), -self.config["reward_clip"]
+                    )
 
                 if render:
                     env.render()
@@ -181,7 +181,7 @@ class Primary(Secondary):
             state = FrameStackState(
                 self.config["obs_shape"],
                 self.config["stack_frames"]
-                )
+            )
         else:
             state = State()
 
@@ -214,7 +214,7 @@ class Primary(Secondary):
                 "seed": seed,
                 "n_genes": self.es.n_genes,
                 "stop": False
-                }
+            }
 
             self.comm.bcast(d, root=0)  # Send eval info
 
@@ -248,7 +248,7 @@ class Primary(Secondary):
     def stop(self):
         d = {
             "stop": True
-            }
+        }
         # print("Sending stop signal")
         self.comm.bcast(d, root=0)  # Send eval info => init_eval()
 

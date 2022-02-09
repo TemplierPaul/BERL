@@ -8,4 +8,4 @@ eval_freq: 100
 save_path: /scratch/disc/p.templier
 
 max_frames: 1100000000 # Total frames: 1.1b
-pop_per_cpu: 2    # Number of agents per secondary cpu (0 to use "pop" instead)
+pop_per_cpu: 2 # Number of agents per secondary cpu (0 to use "pop" instead)

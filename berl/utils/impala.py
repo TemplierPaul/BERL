@@ -12,8 +12,10 @@ class ResidualBlock(nn.Module):
     def __init__(self,
                  in_channels):
         super(ResidualBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(
+            in_channels=in_channels, out_channels=in_channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(
+            in_channels=in_channels, out_channels=in_channels, kernel_size=3, stride=1, padding=1)
 
     def forward(self, x):
         out = nn.ReLU()(x)
@@ -22,10 +24,12 @@ class ResidualBlock(nn.Module):
         out = self.conv2(out)
         return out + x
 
+
 class ImpalaBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(ImpalaBlock, self).__init__()
-        self.conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1)
+        self.conv = nn.Conv2d(
+            in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1)
         self.res1 = ResidualBlock(out_channels)
         self.res2 = ResidualBlock(out_channels)
 
@@ -35,6 +39,7 @@ class ImpalaBlock(nn.Module):
         x = self.res1(x)
         x = self.res2(x)
         return x
+
 
 class ImpalaModel(nn.Module):
     def __init__(self,
@@ -58,4 +63,3 @@ class ImpalaModel(nn.Module):
         x = nn.ReLU()(x)
         x = self.fc2(x)
         return x
-

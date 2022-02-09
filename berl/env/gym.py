@@ -5,6 +5,7 @@ import math
 import numpy as np
 from scipy.misc import derivative
 
+
 class ClipActions(gym.Wrapper):
     def step(self, action):
         action = np.clip(action, self.action_space.low, self.action_space.high)
@@ -24,14 +25,14 @@ class CartPoleSwingUp(gym.Wrapper):
         state, reward, done, _ = super().step(action)
         self.env.env.steps_beyond_done = None
         x, x_dot, theta, theta_dot = state
-        theta = (theta+np.pi)%(2*np.pi)-np.pi
+        theta = (theta+np.pi) % (2*np.pi)-np.pi
         self.env.env.state = [x, x_dot, theta, theta_dot]
-        
+
         done = x < -self.x_threshold \
-               or x > self.x_threshold \
-               or theta_dot < -self.theta_dot_threshold \
-               or theta_dot > self.theta_dot_threshold
-        
+            or x > self.x_threshold \
+            or theta_dot < -self.theta_dot_threshold \
+            or theta_dot > self.theta_dot_threshold
+
         if done:
             # game over
             reward = -10.
@@ -50,7 +51,8 @@ class CartPoleSwingUp(gym.Wrapper):
 
         return np.array([x, x_dot, theta, theta_dot]), reward, done, {}
 
-# Custom MC 
+# Custom MC
+
 
 class CustomMountainCarEnv(MountainCarEnv):
     def __init__(self, goal_velocity=0):
@@ -58,17 +60,19 @@ class CustomMountainCarEnv(MountainCarEnv):
         self.max_position = 2
         self.min_position = -self.max_position
         x = (self.max_position+self.min_position)/2
-        goal_width=0.1
-        self.min_goal_position= x-goal_width/2
-        self.max_goal_position= x+goal_width/2
-        
-        self.out_score = -1000 # -1/(1-self.gamma)
+        goal_width = 0.1
+        self.min_goal_position = x-goal_width/2
+        self.max_goal_position = x+goal_width/2
+
+        self.out_score = -1000  # -1/(1-self.gamma)
 
     def step(self, action):
-        assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
+        assert self.action_space.contains(
+            action), "%r (%s) invalid" % (action, type(action))
 
         position, velocity = self.state
-        velocity += (action - 1) * self.force + self._weight(position) * (-self.gravity)
+        velocity += (action - 1) * self.force + \
+            self._weight(position) * (-self.gravity)
         velocity = np.clip(velocity, -self.max_speed, self.max_speed)
         position += velocity
 
@@ -85,21 +89,21 @@ class CustomMountainCarEnv(MountainCarEnv):
 
     def _height(self, x):
         # return (np.sin(7 * (x + 0.55)) * .45 + .55)*np.exp(0.1*x)+0.1*x
-        return np.cos(np.pi * x) * .45 + .55 #+0.05*(x-self.min_position)
-    
+        return np.cos(np.pi * x) * .45 + .55  # +0.05*(x-self.min_position)
+
     def _weight(self, x):
-        return derivative(self._height, x, dx=1e-6) /1.35
-    
+        return derivative(self._height, x, dx=1e-6) / 1.35
+
     def _reward_done(self, x):
-#         x = np.clip(x, self.min_position, self.max_position)
+        #         x = np.clip(x, self.min_position, self.max_position)
         if x <= self.min_position or x >= self.max_position:
             return self.out_score, True
         elif x >= self.min_goal_position and x <= self.max_goal_position:
             return 0, False
         else:
             return -1, False
-    
-    def render(self, mode='human'): # pragma: no cover
+
+    def render(self, mode='human'):  # pragma: no cover
         screen_width = 600
         world_width = self.max_position - self.min_position
         scale = screen_width / world_width

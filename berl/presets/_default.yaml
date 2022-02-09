@@ -1,33 +1,33 @@
-env: CartPole-v1  # Env
-optim: snes       # Optimizer
-algo: neuroevo    # Algorithm
-net: flat         # Network
-gen: 100          # Number of generations to run
-pop: 12           # Population size
-seed: 0           # Random seed
+env: CartPole-v1 # Env
+optim: snes # Optimizer
+algo: neuroevo # Algorithm
+net: flat # Network
+gen: 100 # Number of generations to run
+pop: 12 # Population size
+seed: 0 # Random seed
 max_frames: 1000000 # Total frames
-max_evals: 20000  # Total episodes
-episode_frames: 300  # Max frames per episode
-stack_frames: 1   # Frames to stack
-reward_clip: 0    # Reward clipping
-pop_per_cpu: 2    # Number of agents per secondary cpu (0 to use "pop" instead)
-noise_size: 5     # Power of 10 for the size of the noise matrix
+max_evals: 20000 # Total episodes
+episode_frames: 300 # Max frames per episode
+stack_frames: 1 # Frames to stack
+reward_clip: 0 # Reward clipping
+pop_per_cpu: 2 # Number of agents per secondary cpu (0 to use "pop" instead)
+noise_size: 5 # Power of 10 for the size of the noise matrix
 
 # Xp analysis
 plot: False
-wandb: None       # Name of the wandb project
-no_save: False    # If true, doesn't save
-save_freq: 10     # Number of generations between saving population
-eval_freq: 10     # Number of generations between evaluating the elite
-save_path: .      # Path to save the population
+wandb: None # Name of the wandb project
+no_save: False # If true, doesn't save
+save_freq: 10 # Number of generations between saving population
+eval_freq: 10 # Number of generations between evaluating the elite
+save_path: . # Path to save the population
 
 # C51
-c51: False         # Categorical DQN network
-V_min: -1         # C51 param
-V_max: 1          # C51 param
-atoms: 51         # C51 param
+c51: False # Categorical DQN network
+V_min: -1 # C51 param
+V_max: 1 # C51 param
+atoms: 51 # C51 param
 
-# Canonical 
+# Canonical
 es_sigma: 0.01
 es_lr: 1
 es_sigma_factor: 1
@@ -41,11 +41,11 @@ es_gradient_optim: Base # Base / SGD / Adam
 
 # Custom
 custom_symmetry: False # True / False
-custom_sigma_update: False   # True / False
-custom_gradient: plain  # Natural / Plain
+custom_sigma_update: False # True / False
+custom_gradient: plain # Natural / Plain
 custom_rank_sum: True # Use rank-based noise sum
-custom_wi: log    # Weights decay for the rank-based noise sum: linear / log
-custom_wi_sum: 0  # Sum of weights: 0 or 1
+custom_wi: log # Weights decay for the rank-based noise sum: linear / log
+custom_wi_sum: 0 # Sum of weights: 0 or 1
 es_mu_ratio: 0
 # Use es_mu_ratio = 1 to use weights on the whole population
 # Use es_mu_ratio = 2 for SNES-like

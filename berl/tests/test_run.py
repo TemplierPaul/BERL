@@ -10,6 +10,7 @@ def test_parse():
     assert args.algo == "neuroevo"
     assert args.gen == 100
 
+
 def test_preset():
     s = ""
     args, unknown = parser.parse_known_args(s.split())
@@ -18,7 +19,7 @@ def test_preset():
 
     print("\n\nAFTER", args)
 
-    assert args.c51 
+    assert args.c51
     assert args.env == "CartPole-v1"
     assert args.algo == "neuroevo"
     assert args.gen == 100
@@ -30,10 +31,11 @@ def test_preset():
 
     print("\n\nAFTER", args)
 
-    assert args.c51 
+    assert args.c51
     assert args.env == "Breakout-v0"
     assert args.algo == "neuroevo"
     assert args.episode_frames == 27000
+
 
 def test_set_xp():
     s = "--preset atari"
@@ -45,13 +47,14 @@ def test_set_xp():
     assert pb.config["c51"] == True
     assert pb.config["env"] == "Breakout-v0"
     assert pb.config["algo"] == "neuroevo"
-    
+
+
 def test_run():
     configs = [
-        "--gen=3", # Cartpole
-        "--preset minatar --gen=3 --episode_frames=300", # Minatar
-        "--preset atari --gen=3 --episode_frames=300", # Atari
-        "--preset atari --gen=3 --episode_frames=300 --net=conv" # Atari, big network
+        "--gen=3",  # Cartpole
+        "--preset minatar --gen=3 --episode_frames=300",  # Minatar
+        "--preset atari --gen=3 --episode_frames=300",  # Atari
+        "--preset atari --gen=3 --episode_frames=300 --net=conv"  # Atari, big network
     ]
     for s in configs:
         pb = set_xp(s)

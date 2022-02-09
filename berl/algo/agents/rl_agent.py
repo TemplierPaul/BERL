@@ -1,13 +1,14 @@
-from ...utils.state import * 
+from ...utils.state import *
 import torch.nn.functional as F
 
 
 class Agent:
     def __init__(self, Net, config):
         self.config = config
-        self.Net = Net 
+        self.Net = Net
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
 
         self.model = None
         self.target = None
@@ -16,17 +17,17 @@ class Agent:
 
         # State
         if self.config["stack_frames"] > 1:
-            self.state = FrameStackState(self.config["obs_shape"], self.config["stack_frames"])
+            self.state = FrameStackState(
+                self.config["obs_shape"], self.config["stack_frames"])
         else:
             self.state = State()
 
         self.criterion = torch.nn.MSELoss()
-        
 
-    def __repr__(self): # pragma: no cover
-        return f"Agent {self.model} > fitness={self.fitness}" 
-        
-    def __str__(self): # pragma: no cover
+    def __repr__(self):  # pragma: no cover
+        return f"Agent {self.model} > fitness={self.fitness}"
+
+    def __str__(self):  # pragma: no cover
         return self.__repr__()
 
     def make_network(self):
@@ -46,7 +47,8 @@ class Agent:
     def genes(self, params):
         if self.model is None:
             self.make_network()
-        assert len(params) == len(self.genes), "Genome size does not fit the network size"
+        assert len(params) == len(
+            self.genes), "Genome size does not fit the network size"
         if np.isnan(params).any():
             raise
         a = torch.tensor(params, device=self.device)
@@ -64,7 +66,7 @@ class Agent:
         return int(np.argmax(actions))
 
     def continuous_act(self, obs):
-        # continuous actions 
+        # continuous actions
         self.state.update(obs)
         with torch.no_grad():
             x = self.state.get().to(self.device).double()
@@ -77,13 +79,15 @@ class Agent:
             self.config["lr"] = 0.001
         if self.model is None:
             self.make_network()
-        if self.config["SGD"].lower()=="adam":
-            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.config["lr"])
+        if self.config["SGD"].lower() == "adam":
+            self.optimizer = torch.optim.Adam(
+                self.model.parameters(), lr=self.config["lr"])
         else:
-            self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.config["lr"])
+            self.optimizer = torch.optim.RMSprop(
+                self.model.parameters(), lr=self.config["lr"])
         return self
 
-    def dqn_loss(self, target, X, A, R, Y, D): # pragma: no cover
+    def dqn_loss(self, target, X, A, R, Y, D):  # pragma: no cover
         state = X.to(self.device)
         actions = A.to(torch.long).to(self.device)
         r = R.to(self.device).unsqueeze(1)
@@ -92,38 +96,40 @@ class Agent:
 
         # for i in [state, actions, r, next_s, done]:
         #     print(i.shape)
-        
-        current_Q = self.model(state).to(self.device).gather(1, actions.unsqueeze(1)) # Q(s, a) with a the action selected in A
+
+        current_Q = self.model(state).to(self.device).gather(
+            1, actions.unsqueeze(1))  # Q(s, a) with a the action selected in A
         # print("Current Q", current_Q.shape)
 
-        if self.double_dqn: # Double DQN
+        if self.double_dqn:  # Double DQN
             next_actions = self.model(next_s).argmax(1).unsqueeze(1)
             # print("next actions", next_actions.shape)
 
             next_Q = target(next_s).gather(1, next_actions)
             # print("next_Q", next_Q.shape)
 
-        else: # Simple DQN
-            next_Q = target(next_s).max(1)[0].unsqueeze(1) # max Q(s', a')
+        else:  # Simple DQN
+            next_Q = target(next_s).max(1)[0].unsqueeze(1)  # max Q(s', a')
             # print("next_Q", next_Q.shape)
-        
-        next_Q = next_Q.cpu().detach().to(self.device) 
+
+        next_Q = next_Q.cpu().detach().to(self.device)
 
         # Update
-        target_Q =  r + (1-done) * (self.gamma ** self.update_horizon) * next_Q # R + gamma * (1-D) * max Q(s', a') 
+        # R + gamma * (1-D) * max Q(s', a')
+        target_Q = r + (1-done) * (self.gamma ** self.update_horizon) * next_Q
         target_Q = target_Q.detach()
         # print("target_Q", target_Q.shape)
 
         loss = self.criterion(current_Q, target_Q)
         return loss
 
-    def backprop(self, loss): # pragma: no cover
+    def backprop(self, loss):  # pragma: no cover
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
         return self
 
-    def __eq__(self, other): 
-        if type(other) != type(self): # pragma: no cover
+    def __eq__(self, other):
+        if type(other) != type(self):  # pragma: no cover
             return False
         return (self.genes == other.genes).all()

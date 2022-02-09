@@ -6,7 +6,7 @@ import yaml
 
 import matplotlib.pyplot as plt
 
-try: 
+try:
     import wandb
     use_wandb = True
 except:
@@ -23,6 +23,7 @@ path = path.split("/BERL/")[0]
 presets_folder = f"{path}/BERL/berl/presets"
 # print("Presets folder:", presets_folder)
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -33,16 +34,17 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
 parser = argparse.ArgumentParser(description='Get DQNES arguments')
 
-parser.add_argument('--preset', 
-    help='Parameters preset: overrides defaults, but is overridden command args',
-    nargs='+',
-    default=None)
+parser.add_argument('--preset',
+                    help='Parameters preset: overrides defaults, but is overridden command args',
+                    nargs='+',
+                    default=None)
 
 
 ALGOS = {
-    "neuroevo":NeuroEvo
+    "neuroevo": NeuroEvo
 }
 
 
@@ -70,7 +72,8 @@ def load_preset(args, folder=None):
     args.__dict__ = default
     return args
 
-def set_xp(args, folder=None):  
+
+def set_xp(args, folder=None):
     if folder is None:
         folder = presets_folder
     if isinstance(args, str):
@@ -84,17 +87,18 @@ def set_xp(args, folder=None):
     now = str(datetime.now()).replace(":", "-").replace(" ", "_")
 
     if args.no_save:
-        path=None
+        path = None
     else:
         folder = f"{args.env}_{args.algo}_{args.optim}_{now}"
         path = f"{args.save_path}/saves/{args.env}/{args.algo}/{args.optim}/{folder}"
 
     pb = algo(
         Net=net,
-        config=args.__dict__, 
+        config=args.__dict__,
         save_path=path)
 
     return pb
+
 
 def load_xp(path, gen=None, folder=None):
     # Config
@@ -105,7 +109,7 @@ def load_xp(path, gen=None, folder=None):
 
     with open(cfg[0], 'r') as f:
         args.__dict__ = json.load(f)
-    args.preset=[]
+    args.preset = []
     pb = set_xp(args, folder)
 
     save_path = f"{path}/checkpoint_*.npz"
@@ -114,7 +118,7 @@ def load_xp(path, gen=None, folder=None):
     assert len(checkpoints) > 0, f"No checkpoints found in path {path}"
     save_path = checkpoints[-1] if gen is None else f"./{path}/checkpoint_{gen}.npz"
     f = np.load(save_path)
-    d = {k:f[k] for k in f.files}
+    d = {k: f[k] for k in f.files}
 
     pb.load(d)
     return pb
@@ -139,6 +143,7 @@ def run_xp(args):
     #     pass
     return pb
 
+
 def get_default(parser, folder):
     # Get default config
     args, unknown = parser.parse_known_args()
@@ -157,8 +162,7 @@ def get_default(parser, folder):
         elif isinstance(v, float):
             parser.add_argument(f'--{k}', type=float)
         elif isinstance(v, list):
-            assert k =="preset"
+            assert k == "preset"
         else:
             raise NotImplementedError(f"Argument error: {k} ({v})")
     return parser
-

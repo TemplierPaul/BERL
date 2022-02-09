@@ -2,13 +2,14 @@ import numpy as np
 from abc import abstractmethod
 from .gradient import *
 
+
 class ES:
     def __init__(self, n_genes, config):
         self.n_genes = n_genes
         self.n_pop = config["pop"]
 
         # Number of parents selected
-        if config["es_mu_ratio"]>0:
+        if config["es_mu_ratio"] > 0:
             self.mu = int(self.n_pop / config["es_mu_ratio"])
             config["es_mu"] = self.mu
         else:
@@ -40,14 +41,15 @@ class ES:
         if key > 0:
             return self.noise[key:(key+self.n_genes)]
         key = abs(key)
-        return -1* self.noise[key:(key+self.n_genes)]
+        return -1 * self.noise[key:(key+self.n_genes)]
 
     def r_noise_id(self):
         return self.rng.integers(0, len(self.noise)-self.n_genes)
 
     def sample_normal(self):
         assert self.noise is not None, "There is no noise matrix"
-        self.noise_index = np.array([self.r_noise_id() for _ in range(self.n_pop)])
+        self.noise_index = np.array([self.r_noise_id()
+                                    for _ in range(self.n_pop)])
         return self.noise_index
 
     def sample_symmetry(self):
@@ -76,24 +78,24 @@ class ES:
         self.gen += 1
 
     @abstractmethod
-    def populate(self): # pragma: no cover
+    def populate(self):  # pragma: no cover
         pass
 
     @abstractmethod
-    def update(self): # pragma: no cover
+    def update(self):  # pragma: no cover
         pass
 
     @abstractmethod
-    def update_from_population(self, pop): # pragma: no cover
+    def update_from_population(self, pop):  # pragma: no cover
         pass
 
     def export(self):
         """
         Export self state as a dict
         """
-        d={
-            "gen":self.gen,
-            "theta":self.theta
+        d = {
+            "gen": self.gen,
+            "theta": self.theta
         }
         return d
 

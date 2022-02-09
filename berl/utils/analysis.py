@@ -30,7 +30,7 @@ class WandBProject:
             for r in self.runs
             if all(r.config[k] == v for k, v in filters.items())
         ]
-
+ 
         return runs
     
     def load(self, run, version="latest"):

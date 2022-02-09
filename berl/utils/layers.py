@@ -30,7 +30,7 @@ class VirtualBatchNorm(nn.Module):
         self.ref_mu = None
         self.ref_var = None
         self.eps = eps
-        self.out_features=in_features
+        self.out_features = in_features
 
     def _batch_stats(self, x):
         r"""Computes the statistics of the batch ``x``.
@@ -38,10 +38,10 @@ class VirtualBatchNorm(nn.Module):
             x (torch.Tensor): Tensor whose statistics need to be computed.
         Returns:
             A tuple of the mean and variance of the batch ``x``.
-        """  
+        """
         mu = torch.mean(x, dim=0, keepdim=True)
         var = torch.var(x, dim=0, keepdim=True)
-        if (var!=var).sum() > 0:
+        if (var != var).sum() > 0:
             print("NAN")
             print(x)
             raise

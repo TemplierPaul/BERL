@@ -3,11 +3,11 @@ optim: custom
 # Custom
 custom_symmetry: False # Random sampling: True / False
 
-custom_wi: None         # Weights for the noise sum: None / SNES / Canonical / Openai
-custom_wi_sum: 0  # Sum of weights: 0 or 1
+custom_wi: None # Weights for the noise sum: None / SNES / Canonical / Openai
+custom_wi_sum: 0 # Sum of weights: 0 or 1
 
-custom_natural_gradient: False  # Use Natural gradient: True / False 
-custom_gradient: plain  # Natural / Plain
+custom_natural_gradient: False # Use Natural gradient: True / False
+custom_gradient: plain # Natural / Plain
 
 # Gradient optimizer
 es_gradient_optim: adam # Base / SGD / Adam
@@ -15,7 +15,7 @@ es_momentum: 0.9
 es_beta1: 0.9
 es_beta2: 0.999
 
-custom_sigma_update: False   # Sigma update:  True / False
+custom_sigma_update: False # Sigma update:  True / False
 
 custom_rank_sum: True # Use rank-based noise sum
 es_mu_ratio: 0

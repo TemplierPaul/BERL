@@ -280,7 +280,7 @@ class NeuroEvo:
                 self.wandb_run.log_artifact(artifact)
 
                 # Add vb artifact
-                if vb is not None:
+                if vb is not None: 
                     artifact = wandb.Artifact(
                         self.wandb_save_name + "_vb", 
                         type = self.config["env"],
