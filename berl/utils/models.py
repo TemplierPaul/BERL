@@ -92,7 +92,7 @@ class MujocoNet(nn.Module):
         x = F.tanh(x)
 
         x = self.fc3(x)
-        x = F.tanh(x)
+        # x = F.tanh(x)
         return x
 
 
@@ -151,7 +151,7 @@ class DiscreteMujocoNet(nn.Module):
         x = torch.tanh(x)
 
         x = self.fc3(x)
-        x = torch.tanh(x)
+        # x = torch.tanh(x)
         x = x.reshape(-1, self.dim, self.n_bins)
         a = x.argmax(axis=2)
 

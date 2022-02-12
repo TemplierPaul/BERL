@@ -252,11 +252,9 @@ class Primary(Secondary):
         # print("Sending stop signal")
         self.comm.bcast(d, root=0)  # Send eval info => init_eval()
 
-    def eval_elite(self, elite, seed=-1):
-        # n = self.size*2
-        n = 100
-        pop = [elite for i in range(n)]
-        return self.send_genomes(pop, seed=seed)
+    def eval_elite(self, elite, seed=-1, n=10):
+        pop = [elite for _ in range(n)]
+        return self.evaluate_all(pop, seed=seed)
 
     def evaluate_all(self, pop, hof=None, seed=0):
         f = [self.evaluate(np.float64(g), seed=seed) for g in pop]

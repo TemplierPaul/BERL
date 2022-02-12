@@ -19,6 +19,7 @@ wandb: None # Name of the wandb project
 no_save: False # If true, doesn't save
 save_freq: 10 # Number of generations between saving population
 eval_freq: 10 # Number of generations between evaluating the elite
+eval_size: 10 # Number of times to evaluate the elite
 save_path: . # Path to save the population
 
 # C51

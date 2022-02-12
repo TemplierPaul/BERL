@@ -129,6 +129,8 @@ class NeuroEvo:
         self.logger("total frames", self.MPINode.total_frames)
         self.logger("fitness", self.hof.fitness)
         self.logger("sigma", np.mean(self.optim.sigma))
+        if self.gen_periodic("eval_freq"):
+            self.eval_hof()
         self.optim.tell(self.noise_index, self.fitness) # Optim step
 
     def train(self, steps=None):
@@ -161,13 +163,13 @@ class NeuroEvo:
         print(f"Mean over {n} runs: {np.mean(fitnesses)}")
 
     def eval_hof(self):
-        f = self.MPINode.eval_elite(self.hof.genes)
-        print(f"Evaluating elite: {len(f)} evals")
-        print("Fitness of elite:", np.mean(f), "\nstd:", np.std(f))
+        f = self.MPINode.eval_elite(self.hof.genes, n = self.config["eval_size"])
+        # print(f"Evaluating elite: {len(f)} evals")
+        # print("Fitness of elite:", np.mean(f), "\nstd:", np.std(f))
         if self.wandb_run is not None: # pragma: no cover
             wandb.log({
-                "final fitness average": np.mean(f),
-                "final fitness average": np.std(f)
+                "validation fitness average": np.mean(f),
+                "validation fitness std": np.std(f)
                 })
 
     # def get_hof(self):
@@ -197,8 +199,12 @@ class NeuroEvo:
         return d
 
     def set_wandb(self, project): # pragma: no cover
+        entity = None
+        if "/" in project:
+            entity, project = project.split("/")
         self.wandb_run = wandb.init(
             project=project,
+            entity=entity,
             config=self.get_config()
         )
         print("wandb run:", wandb.run.name)
@@ -240,7 +246,7 @@ class NeuroEvo:
         if path is not None:
             self.create_path(path)
             # Save config
-            config_path = path + "/config.json"
+            config_path = f'{path}/config.json'
             with open(config_path, 'w') as outfile:
                 json.dump(self.config, outfile)
 
@@ -250,7 +256,7 @@ class NeuroEvo:
             d["hof_genes"] = self.hof.genes
             d["hof_fit"] = self.hof.fitness
             np.savez_compressed(save_path, **d)
-            
+
             print(f"Saved at {save_path}")
 
             # Save Virtual batch
@@ -272,10 +278,11 @@ class NeuroEvo:
                     np.save(f, genome)
 
                 artifact = wandb.Artifact(
-                    self.wandb_save_name + "_net", 
-                    type = self.config["env"],
-                    metadata = self.config                    
-                    )
+                    f'{self.wandb_save_name}_net',
+                    type=self.config["env"],
+                    metadata=self.config,
+                )
+
                 artifact.add_file(wandb_path)
                 self.wandb_run.log_artifact(artifact)
 
