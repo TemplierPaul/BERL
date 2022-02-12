@@ -169,6 +169,9 @@ class NeuroEvo:
         if self.wandb_run is not None: # pragma: no cover
             wandb.log({
                 "validation fitness average": np.mean(f),
+                "validation fitness median": np.median(f),
+                "validation fitness max": np.max(f),
+                "validation fitness min": np.min(f),
                 "validation fitness std": np.std(f)
                 })
 
