@@ -122,7 +122,8 @@ class NeuroEvo:
     def step(self):
         self.fitness = None
         self.noise_index = self.optim.ask() # Get list of noise indices
-        env_seed = int(self.rng.integers(10000000)) # Seed
+        # env_seed = int(self.rng.integers(10000000)) # Seed
+        seed = 0
         self.hof = Indiv(self.optim.theta, 0) # Solution: center of the distribution
         self.fitness = self.MPINode.send_genomes(self.noise_index, hof=self.hof, seed=env_seed) # Evaluate
         # self.get_hof() 

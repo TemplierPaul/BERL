@@ -16,6 +16,7 @@ noise_size: 5 # Power of 10 for the size of the noise matrix
 # Xp analysis
 plot: False
 wandb: None # Name of the wandb project
+job: 0 # Slurm job id
 no_save: False # If true, doesn't save
 save_freq: 10 # Number of generations between saving population
 eval_freq: 10 # Number of generations between evaluating the elite
