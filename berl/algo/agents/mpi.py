@@ -188,6 +188,7 @@ class Primary(Secondary):
         vb = []
         env.reset()
         vb_rng = np.random.default_rng(seed=123)
+        vb_size = self.config["vbn"]
         while len(vb) < 128:
             # Apply random action and with 1% chance save this state.
             a = vb_rng.integers(0, self.config["n_actions"])
