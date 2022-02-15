@@ -100,7 +100,7 @@ class Secondary:
         }
         return self.comm.gather(d, root=0)
 
-    def evaluate(self, genome, seed=0, render=False, test=False):
+    def evaluate(self, genome, seed=0, render=False, test=False, count_frames=True):
         if seed < 0:
             seed = np.random.randint(0, 1000000000)
 
@@ -140,7 +140,8 @@ class Secondary:
 
         finally:
             env.close()
-        self.frames += n_frames
+        if count_frames:
+            self.frames += n_frames
         return total_r
 
     def make_agent(self, genome=None):
@@ -255,14 +256,16 @@ class Primary(Secondary):
 
     def eval_elite(self, elite, seed=-1, n=10):
         pop = [elite for _ in range(n)]
-        return self.evaluate_all(pop, seed=seed)
+        return self.evaluate_all(pop, seed=seed, count_frames=False)
 
-    def evaluate_all(self, pop, hof=None, seed=0):
-        f = [self.evaluate(np.float64(g), seed=seed) for g in pop]
+    def evaluate_all(self, pop, hof=None, seed=0, count_frames=True):
+        f = [self.evaluate(np.float64(g), seed=seed,
+                           count_frames=count_frames) for g in pop]
 
         if hof is not None:
             g = hof.genes  # genome
             g = np.float64(g)
-            hof.fitness = self.evaluate(g, seed=seed)
+            hof.fitness = self.evaluate(
+                g, seed=seed, count_frames=count_frames)
 
         return f
