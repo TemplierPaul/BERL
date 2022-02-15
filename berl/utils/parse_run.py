@@ -102,7 +102,7 @@ def set_xp(args, folder=None):
 
 def load_xp(path, gen=None, folder=None):
     # Config
-    config_path = path + "/config.json"
+    config_path = f'{path}/config.json'
     cfg = glob(config_path)
     assert len(cfg) == 1, f"{len(cfg)} config files found in path {path}"
     args = argparse.ArgumentParser().parse_args("")

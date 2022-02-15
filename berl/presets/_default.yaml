@@ -17,6 +17,7 @@ vbn: 128 # Virtual batch normalization
 # Xp analysis
 plot: False
 wandb: None # Name of the wandb project
+tag: None # Tag for the wandb run
 job: 0 # Slurm job id
 no_save: False # If true, doesn't save
 save_freq: 10 # Number of generations between saving population
