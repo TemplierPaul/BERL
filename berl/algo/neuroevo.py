@@ -130,6 +130,13 @@ class NeuroEvo:
         self.logger("total frames", self.MPINode.total_frames)
         self.logger("fitness", self.hof.fitness)
         self.logger("sigma", np.mean(self.optim.sigma))
+
+        self.logger("pop mean", np.mean(self.fitness))
+        self.logger("pop median", np.median(self.fitness))
+        self.logger("pop std", np.std(self.fitness))
+        self.logger("pop max", np.max(self.fitness))
+        self.logger("pop min", np.min(self.fitness))
+        
         if self.gen_periodic("eval_freq"):
             self.eval_hof()
         self.optim.tell(self.noise_index, self.fitness) # Optim step
