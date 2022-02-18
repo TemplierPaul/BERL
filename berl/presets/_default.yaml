@@ -15,6 +15,7 @@ noise_size: 5 # Power of 10 for the size of the noise matrix
 vbn: 128 # Virtual batch normalization
 xavier_init: False # Xavier initialization
 theta_init_std: 0.05 # Standard deviation for theta initialization
+theta_init_bias: 0. # Bias for theta initialization
 
 # Xp analysis
 plot: False

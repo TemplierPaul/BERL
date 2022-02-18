@@ -37,11 +37,22 @@ class ES:
     def __str__(self):
         return self.__repr__()
 
-    def set_theta(self, net):
+    def set_xavier_theta(self, net):
         for l in net:
             if isinstance(l, (nn.Linear, nn.Conv2d)):
                 torch.nn.init.xavier_uniform(l.weight)
-                l.bias.data.fill_(0.)
+                l.bias.data.fill_(self.config["theta_init_bias"])
+        with torch.no_grad():
+            params = net.parameters()
+            vec = torch.nn.utils.parameters_to_vector(params)
+        self.theta = vec.cpu().double().numpy()
+
+    def set_random_theta(self, net):
+        for l in net:
+            if isinstance(l, (nn.Linear, nn.Conv2d)):
+                torch.nn.init.normal_(
+                    l.weight, std=self.config["theta_init_std"])
+                l.bias.data.fill_(self.config["theta_init_bias"])
         with torch.no_grad():
             params = net.parameters()
             vec = torch.nn.utils.parameters_to_vector(params)
