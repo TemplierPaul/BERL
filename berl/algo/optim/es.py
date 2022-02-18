@@ -38,7 +38,7 @@ class ES:
         return self.__repr__()
 
     def set_xavier_theta(self, net):
-        for l in net:
+        for l in net._modules:
             if isinstance(l, (nn.Linear, nn.Conv2d)):
                 torch.nn.init.xavier_uniform(l.weight)
                 l.bias.data.fill_(self.config["theta_init_bias"])
@@ -48,7 +48,7 @@ class ES:
         self.theta = vec.cpu().double().numpy()
 
     def set_random_theta(self, net):
-        for l in net:
+        for l in net._modules:
             if isinstance(l, (nn.Linear, nn.Conv2d)):
                 torch.nn.init.normal_(
                     l.weight, std=self.config["theta_init_std"])
