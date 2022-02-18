@@ -13,6 +13,8 @@ reward_clip: 0 # Reward clipping
 pop_per_cpu: 2 # Number of agents per secondary cpu (0 to use "pop" instead)
 noise_size: 5 # Power of 10 for the size of the noise matrix
 vbn: 128 # Virtual batch normalization
+xavier_init: False # Xavier initialization
+theta_init_std: 0.05 # Standard deviation for theta initialization
 
 # Xp analysis
 plot: False

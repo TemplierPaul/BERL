@@ -1,6 +1,8 @@
 import numpy as np
 from abc import abstractmethod
 from .gradient import *
+import torch
+import torch.nn as nn
 
 
 class ES:
@@ -20,7 +22,8 @@ class ES:
         self.rng = np.random.default_rng(self.config["seed"])
 
         # Current solution (The one that we report).
-        self.theta = self.rng.standard_normal(self.n_genes) * 0.05
+        self.theta = self.rng.standard_normal(
+            self.n_genes) * self.config["theta_init_std"]
 
         self.noise = None
         self.noise_index = []
@@ -33,6 +36,16 @@ class ES:
 
     def __str__(self):
         return self.__repr__()
+
+    def set_theta(self, net):
+        for l in net:
+            if isinstance(l, (nn.Linear, nn.Conv2d)):
+                torch.nn.init.xavier_uniform(l.weight)
+                l.bias.data.fill_(0.)
+        with torch.no_grad():
+            params = net.parameters()
+            vec = torch.nn.utils.parameters_to_vector(params)
+        self.theta = vec.cpu().double().numpy()
 
     ### Noise ###
 

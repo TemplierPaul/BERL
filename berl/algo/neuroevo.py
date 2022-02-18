@@ -105,6 +105,9 @@ class NeuroEvo:
         n_genes = get_genome_size(self.Net, c51=self.config["c51"])
         self.optim = OPTIM(n_genes, self.config)
         self.optim.noise = self.MPINode.noise # share noise with ES
+        if self.config["xavier_init"]:
+            model = self.Net(c51=self.config["c51"]).double()
+            self.optim.set_theta(model)
         self.MPINode.es = self.optim # Share ES state with MPI node
 
     def close_MPI(self):
