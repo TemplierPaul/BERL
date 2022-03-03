@@ -1,4 +1,4 @@
-optim: openai
+optim: new_openai
 es_gradient_optim: adam
 es_sigma: 0.01
 es_lr: 0.01
@@ -6,3 +6,4 @@ es_momentum: 0.9
 es_beta1: 0.9
 es_beta2: 0.999
 es_l2coef: 0.005
+es_wd: 0.001 # Weight decay

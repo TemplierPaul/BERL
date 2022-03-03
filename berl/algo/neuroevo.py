@@ -98,6 +98,7 @@ class NeuroEvo:
             "snes":SNES,
             "cmaes":CMAES,
             "openai": OpenAI,
+            "new_openai": NewOpenAI,
             "custom": CustomES
         }
 
