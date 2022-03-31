@@ -57,7 +57,7 @@ class NewOpenAI(ES):
         self.fitnesses = np.array(self.fitnesses)
         # ranks = np.empty(len(self.fitnesses), dtype=int)
         ranks = self.fitnesses.argsort()
-        ranks = ranks / len(ranks)  # Normalize
+        ranks = ranks / (len(ranks) - 1)  # Normalize
 
         delta_rank = {}
         for i in range(n):

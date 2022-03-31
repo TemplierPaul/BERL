@@ -82,19 +82,19 @@ class OpenAI(ES):
         gradient /= self.sigma * self.n_pop
         self.theta += self.gradient_optim.step(gradient)
 
-    def update_from_population(self, pop):
-        d = self.n_genes
-        n = self.n_pop
+    # def update_from_population(self, pop):
+    #     d = self.n_genes
+    #     n = self.n_pop
 
-        fitnesses = pop.get_fitness()
-        self.w = compute_centered_ranks(inv_fitnesses)
+    #     fitnesses = pop.get_fitness()
+    #     self.w = compute_centered_ranks(inv_fitnesses)
 
-        gradient = np.zeros(d)
-        for i in range(self.n_pop):
-            genes = pop.get_indiv(idx[i])
-            s = self.back_random(genes_after=genes)
-            gradient += self.w[i] * s
+    #     gradient = np.zeros(d)
+    #     for i in range(self.n_pop):
+    #         genes = pop.get_indiv(idx[i])
+    #         s = self.back_random(genes_after=genes)
+    #         gradient += self.w[i] * s
 
-        gradient /= self.sigma * self.n_pop  # Normalize
-        gradient -= self.l2coef * self.theta  # L2 regularization
-        self.theta += self.gradient_optim.step(gradient)  # Update theta
+    #     gradient /= self.sigma * self.n_pop  # Normalize
+    #     gradient -= self.l2coef * self.theta  # L2 regularization
+    #     self.theta += self.gradient_optim.step(gradient)  # Update theta

@@ -22,7 +22,7 @@ MUJOCO_ENVS = [
 ]
 
 
-def make_env(env_id, seed=None, render=False, sticky=False):
+def make_env(env_id, seed=None, render=False):
     """
     Utility function for multiprocessed env.
 
@@ -32,6 +32,10 @@ def make_env(env_id, seed=None, render=False, sticky=False):
     """
 
     # TODO Add Brax make_env
+    sticky = False
+    if "sticky-" in env_id:
+        sticky = True
+        env_id = env_id.replace("sticky-", "")
 
     if env_id.lower() == "swingup":
         env = CartPoleSwingUp()

@@ -368,7 +368,6 @@ def wrap_canonical(env):
 
 
 def wrap_sticky(env):
-    """Apply a common set of wrappers for Atari games, similar to the Canonical ES paper"""
     assert 'NoFrameskip' in env.spec.id
 
     # Sample initial states by taking random number of no-ops on reset
