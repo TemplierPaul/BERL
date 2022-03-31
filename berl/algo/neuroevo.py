@@ -308,7 +308,7 @@ class NeuroEvo:
                     artifact = wandb.Artifact(
                         self.wandb_save_name + "_vb", 
                         type = self.config["env"],
-                        metadata = self.config                    
+                        metadata = self.config
                         )
                     artifact.add_file(vb_path)
                     self.wandb_run.log_artifact(artifact)

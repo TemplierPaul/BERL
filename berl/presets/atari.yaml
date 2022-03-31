@@ -6,6 +6,7 @@ max_frames: 1000000000 # Total frames
 max_evals: 10000000 # Total episodes
 episode_frames: 27000 # Max frames per episode
 stack_frames: 4 # Frames to stack
+noise_size: 7 # Power of 10 for the size of the noise matrix
 
 save_freq: 100 # Number of generations between saving population
 eval_freq: 100 # Number of generations between evaluating the elite

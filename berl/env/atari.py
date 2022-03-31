@@ -136,25 +136,25 @@ class StickyMaxAndSkipEnv(gym.Wrapper):
         """Return only every `skip`-th frame"""
         gym.Wrapper.__init__(self, env)
         # most recent raw observations (for max pooling across time steps)
-        self._obs_buffer = np.zeros(
-            (2,)+env.observation_space.shape, dtype=np.uint8)
+        self._obs_buffer = None
         self._stickiness = stickiness
+        self.obs_shape = env.observation_space.shape
 
     def step(self, action):
         """Sticky action, sum reward, and max over last observations."""
         total_reward = 0.0
         done = None
 
-        skip = 0
+        skip = 1
         while np.random.random() >= self._stickiness:
             skip += 1
 
+        self._obs_buffer = np.zeros(
+            (skip,)+self.obs_shape, dtype=np.uint8)
+
         for i in range(skip):
             obs, reward, done, info = self.env.step(action)
-            if i == self._skip - 2:
-                self._obs_buffer[0] = obs
-            if i == self._skip - 1:
-                self._obs_buffer[1] = obs
+            self._obs_buffer[i] = obs
             total_reward += reward
             if done:
                 break
@@ -315,14 +315,14 @@ class LazyFrames(object):
         return self._force()[..., i]
 
 
-def make_atari(env_id, max_episode_steps=None):
-    env = gym.make(env_id)
-    assert 'NoFrameskip' in env.spec.id
-    env = NoopResetEnv(env, noop_max=30)
-    env = MaxAndSkipEnv(env, skip=4)
-    # if max_episode_steps is not None:
-    #     env = TimeLimit(env, max_episode_steps=max_episode_steps)
-    return env
+# def make_atari(env_id, max_episode_steps=None):
+#     env = gym.make(env_id)
+#     assert 'NoFrameskip' in env.spec.id
+#     env = NoopResetEnv(env, noop_max=30)
+#     env = MaxAndSkipEnv(env, skip=4)
+#     # if max_episode_steps is not None:
+#     #     env = TimeLimit(env, max_episode_steps=max_episode_steps)
+#     return env
 
 
 def wrap_deepmind(env, episode_life=True, clip_rewards=True, frame_stack=False, scale=False):
@@ -375,7 +375,7 @@ def wrap_sticky(env):
 
     # Frame skipping
     # fs = 3 if "SpaceInvaders" in env.spec.id else 4
-    env = StickyMaxAndSkipEnv(env, skip=0.25)
+    env = StickyMaxAndSkipEnv(env, stickiness=0.25)
 
     # For environments where the user need to press FIRE for the game to start
     if 'FIRE' in env.unwrapped.get_action_meanings():

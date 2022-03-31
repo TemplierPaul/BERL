@@ -198,6 +198,7 @@ class ConvNet(nn.Module):
 
 @register("conv")
 def gym_conv(env_name, h_size=512):
+    env_name = env_name.replace("sticky-", "")
     env = gym.make(env_name)
     n_out = get_n_out(env)
     env.close()
@@ -262,6 +263,7 @@ class CanonicalNet(nn.Module):
 
 @register("canonical")
 def gym_canonical(env_name, h_size=512):
+    env_name = env_name.replace("sticky-", "")
     env = gym.make(env_name)
     n_out = get_n_out(env)
     env.close()
@@ -298,6 +300,7 @@ class DataEfficientConvNet(nn.Module):
 
 @register("efficientconv")
 def gym_conv_efficient(env_name, h_size=256):
+    env_name = env_name.replace("sticky-", "")
     env = gym.make(env_name)
     n_out = get_n_out(env)
     env.close()
