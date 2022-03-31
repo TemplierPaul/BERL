@@ -16,6 +16,7 @@ class ES:
             config["es_mu"] = self.mu
         else:
             self.mu = config["es_mu"]
+        assert self.mu > 0, "µ must be > 0"
 
         self.config = config
 

@@ -16,6 +16,7 @@ vbn: 128 # Virtual batch normalization
 xavier_init: False # Xavier initialization
 theta_init_std: 0.05 # Standard deviation for theta initialization
 theta_init_bias: 0. # Bias for theta initialization
+n_evaluations: 1 # Number of times to evaluate the same agent
 
 # Xp analysis
 plot: False

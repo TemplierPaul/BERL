@@ -101,6 +101,14 @@ class Secondary:
         return self.comm.gather(d, root=0)
 
     def evaluate(self, genome, seed=0, render=False, test=False, count_frames=True):
+        rewards = []
+        for _ in range(self.config["n_evaluations"]):
+            r = self.single_evaluate(
+                genome, seed=seed, render=render, test=test, count_frames=count_frames)
+            rewards.append(r)
+        return np.mean(rewards)
+
+    def single_evaluate(self, genome, seed=0, render=False, test=False, count_frames=True):
         if seed < 0:
             seed = np.random.randint(0, 1000000000)
 

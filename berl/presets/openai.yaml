@@ -1,6 +1,6 @@
 optim: new_openai
 es_gradient_optim: adam
-es_sigma: 0.01
+es_sigma: 0.02
 es_lr: 0.01
 es_momentum: 0.9
 es_beta1: 0.9
